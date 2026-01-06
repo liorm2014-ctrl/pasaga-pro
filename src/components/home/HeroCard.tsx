@@ -1,8 +1,8 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { Button } from '@/components/ui/button';
-import { ArrowLeft, Sparkles } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import React from "react";
+import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, Sparkles } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const HeroCard: React.FC = () => {
   return (
@@ -44,20 +44,13 @@ const HeroCard: React.FC = () => {
           transition={{ delay: 0.4 }}
           className="text-lg md:text-xl text-primary-foreground/90 mb-8 max-w-2xl"
         >
-          מסע מנהיגותי לניתוח, רפלקציה וחזון אסטרטגי. 
-          שלבו בינה מלאכותית עם מתודולוגיה מקצועית ליצירת תוכנית עבודה שנתית מותאמת אישית.
+          מסע מנהיגותי לניתוח, רפלקציה וחזון אסטרטגי. שלבו בינה מלאכותית עם מתודולוגיה מקצועית ליצירת תוכנית עבודה שנתית
+          מותאמת אישית.
         </motion.p>
 
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-        >
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
           <Link to="/onboarding">
-            <Button 
-              size="lg" 
-              className="btn-hero gap-2 text-foreground"
-            >
+            <Button size="lg" className="btn-hero gap-2 text-foreground">
               <span>התחילו את המסע</span>
               <ArrowLeft className="h-5 w-5" />
             </Button>
