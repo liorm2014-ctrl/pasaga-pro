@@ -2,6 +2,7 @@ import React, { ReactNode } from 'react';
 import Header from './Header';
 import ProgressPanel from './ProgressPanel';
 import { motion } from 'framer-motion';
+import backgroundImage from '@/assets/background.png';
 
 interface LayoutProps {
   children: ReactNode;
@@ -9,7 +10,10 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
-    <div className="min-h-screen bg-background">
+    <div 
+      className="min-h-screen bg-cover bg-center bg-fixed"
+      style={{ backgroundImage: `url(${backgroundImage})` }}
+    >
       <Header />
       <div className="container py-6">
         <ProgressPanel />
