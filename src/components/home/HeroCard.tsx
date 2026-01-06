@@ -9,7 +9,7 @@ const HeroCard: React.FC = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
-      className="relative overflow-hidden rounded-3xl bg-white/80 backdrop-blur-md p-8 md:p-12 shadow-lg border border-primary/20"
+      className="relative overflow-hidden rounded-3xl bg-white/40 backdrop-blur-md p-8 md:p-12 shadow-lg border border-white/30"
     >
       <div className="relative z-10 text-center">
         <motion.div

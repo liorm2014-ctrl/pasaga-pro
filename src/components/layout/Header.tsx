@@ -12,6 +12,7 @@ import {
   Download,
   User
 } from 'lucide-react';
+import ministryLogo from '@/assets/ministry-logo.png';
 
 const navItems = [
   { label: 'דף בית', route: '/', icon: Home },
@@ -76,10 +77,12 @@ const Header: React.FC = () => {
               <span className="text-sm font-medium">{user.fullName}</span>
             </div>
           )}
-          {/* South District Logo */}
-          <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center border border-border">
-            <span className="text-xs font-bold text-primary">דרום</span>
-          </div>
+          {/* Ministry of Education Logo */}
+          <img 
+            src={ministryLogo} 
+            alt="משרד החינוך" 
+            className="h-12 w-auto"
+          />
         </div>
       </div>
     </header>
