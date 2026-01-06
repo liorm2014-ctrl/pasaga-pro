@@ -103,10 +103,10 @@ const JourneySteps: React.FC = () => {
                 <motion.div
                   whileHover={{ scale: 1.02, y: -5 }}
                   className={cn(
-                    "relative h-full p-5 rounded-2xl border transition-all cursor-pointer",
-                    status === 'completed' && "bg-success/5 border-success/30 shadow-md",
-                    status === 'in-progress' && "bg-warning/5 border-warning/30 shadow-lg animate-pulse-glow",
-                    status === 'not-started' && "bg-card border-border/50 shadow-card hover:shadow-lg"
+                    "relative h-full p-5 rounded-2xl border transition-all cursor-pointer bg-white",
+                    status === 'completed' && "border-success/30 shadow-md",
+                    status === 'in-progress' && "border-warning/30 shadow-lg animate-pulse-glow",
+                    status === 'not-started' && "border-primary/30 shadow-card hover:shadow-lg"
                   )}
                 >
                   {/* Step Number Badge */}
