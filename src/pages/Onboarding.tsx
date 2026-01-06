@@ -296,18 +296,22 @@ const Onboarding: React.FC = () => {
                   העלו קובץ תמונה בפורמט PNG או JPG מהמחשב או מהדרייב
                 </p>
                 
-                <label className="cursor-pointer">
-                  <input
-                    type="file"
-                    accept=".png,.jpg,.jpeg"
-                    onChange={handleLogoUpload}
-                    className="hidden"
-                  />
-                  <Button type="button" variant="outline" className="gap-2">
-                    <Upload className="h-4 w-4" />
-                    בחר לוגו
-                  </Button>
-                </label>
+                <input
+                  type="file"
+                  accept=".png,.jpg,.jpeg"
+                  onChange={handleLogoUpload}
+                  className="hidden"
+                  id="logo-upload"
+                />
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  className="gap-2"
+                  onClick={() => document.getElementById('logo-upload')?.click()}
+                >
+                  <Upload className="h-4 w-4" />
+                  בחר לוגו
+                </Button>
 
                 {logoFile && (
                   <motion.div
@@ -331,18 +335,22 @@ const Onboarding: React.FC = () => {
                   העלו קובץ PDF, Excel או CSV מהמחשב או מהדרייב
                 </p>
                 
-                <label className="cursor-pointer">
-                  <input
-                    type="file"
-                    accept=".xlsx,.xls,.csv,.pdf"
-                    onChange={handleFileUpload}
-                    className="hidden"
-                  />
-                  <Button type="button" variant="outline" className="gap-2">
-                    <Upload className="h-4 w-4" />
-                    בחר קובץ
-                  </Button>
-                </label>
+                <input
+                  type="file"
+                  accept=".xlsx,.xls,.csv,.pdf"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                  id="training-upload"
+                />
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  className="gap-2"
+                  onClick={() => document.getElementById('training-upload')?.click()}
+                >
+                  <Upload className="h-4 w-4" />
+                  בחר קובץ
+                </Button>
 
                 {uploadedFile && (
                   <motion.div
@@ -366,18 +374,22 @@ const Onboarding: React.FC = () => {
                   העלו קבצים נוספים שיכולים לסייע בתהליך
                 </p>
                 
-                <label className="cursor-pointer">
-                  <input
-                    type="file"
-                    multiple
-                    onChange={handleAdditionalFileUpload}
-                    className="hidden"
-                  />
-                  <Button type="button" variant="outline" className="gap-2">
-                    <Upload className="h-4 w-4" />
-                    הוסף קבצים
-                  </Button>
-                </label>
+                <input
+                  type="file"
+                  multiple
+                  onChange={handleAdditionalFileUpload}
+                  className="hidden"
+                  id="additional-upload"
+                />
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  className="gap-2"
+                  onClick={() => document.getElementById('additional-upload')?.click()}
+                >
+                  <Upload className="h-4 w-4" />
+                  הוסף קבצים
+                </Button>
 
                 {additionalFiles.length > 0 && (
                   <motion.div
