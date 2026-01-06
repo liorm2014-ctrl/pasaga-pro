@@ -21,7 +21,11 @@ import {
   Upload, 
   FileSpreadsheet,
   ArrowLeft,
-  Check
+  Check,
+  Image,
+  File,
+  X,
+  Plus
 } from 'lucide-react';
 import { Training } from '@/types';
 
@@ -41,6 +45,8 @@ const Onboarding: React.FC = () => {
   });
   
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [additionalFiles, setAdditionalFiles] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleInputChange = (field: string, value: string | number) => {
@@ -54,6 +60,27 @@ const Onboarding: React.FC = () => {
       toast.success(`הקובץ "${file.name}" הועלה בהצלחה`);
     }
   }, []);
+
+  const handleLogoUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setLogoFile(file);
+      toast.success(`הלוגו "${file.name}" הועלה בהצלחה`);
+    }
+  }, []);
+
+  const handleAdditionalFileUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files) {
+      const newFiles = Array.from(files);
+      setAdditionalFiles(prev => [...prev, ...newFiles]);
+      toast.success(`${newFiles.length} קבצים הועלו בהצלחה`);
+    }
+  }, []);
+
+  const removeAdditionalFile = (index: number) => {
+    setAdditionalFiles(prev => prev.filter((_, i) => i !== index));
+  };
 
   const generateSampleTrainings = (): Training[] => {
     const categories = ['פדגוגיה', 'טכנולוגיה', 'ניהול', 'רווחה', 'חינוך מיוחד', 'מנהיגות'] as const;
@@ -152,6 +179,7 @@ const Onboarding: React.FC = () => {
                   onChange={(e) => handleInputChange('fullName', e.target.value)}
                   placeholder="שם פרטי ומשפחה"
                   required
+                  className="border-2 border-primary/30 focus:border-primary shadow-sm"
                 />
               </div>
 
@@ -161,7 +189,7 @@ const Onboarding: React.FC = () => {
                   value={formData.gender} 
                   onValueChange={(value) => handleInputChange('gender', value)}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="border-2 border-primary/30 focus:border-primary shadow-sm">
                     <SelectValue placeholder="בחר מגדר" />
                   </SelectTrigger>
                   <SelectContent>
@@ -185,6 +213,7 @@ const Onboarding: React.FC = () => {
                   value={formData.district}
                   onChange={(e) => handleInputChange('district', e.target.value)}
                   placeholder="מחוז"
+                  className="border-2 border-primary/30 focus:border-primary shadow-sm"
                 />
               </div>
 
@@ -196,6 +225,7 @@ const Onboarding: React.FC = () => {
                   onChange={(e) => handleInputChange('city', e.target.value)}
                   placeholder="שם הישוב"
                   required
+                  className="border-2 border-primary/30 focus:border-primary shadow-sm"
                 />
               </div>
 
@@ -206,12 +236,13 @@ const Onboarding: React.FC = () => {
                   value={formData.pisgaSymbol}
                   onChange={(e) => handleInputChange('pisgaSymbol', e.target.value)}
                   placeholder="סמל מוסד"
+                  className="border-2 border-primary/30 focus:border-primary shadow-sm"
                 />
               </div>
             </div>
 
             {/* Schools Count */}
-            <div className="p-4 rounded-xl bg-secondary/50 border border-border/50">
+            <div className="p-4 rounded-xl bg-secondary/50 border-2 border-primary/20">
               <div className="flex items-center gap-2 mb-4">
                 <Building2 className="h-5 w-5 text-primary" />
                 <span className="font-medium text-foreground">מוסדות חינוך</span>
@@ -226,6 +257,7 @@ const Onboarding: React.FC = () => {
                     min="0"
                     value={formData.numKindergartens}
                     onChange={(e) => handleInputChange('numKindergartens', parseInt(e.target.value) || 0)}
+                    className="border-2 border-primary/30 focus:border-primary shadow-sm"
                   />
                 </div>
 
@@ -237,6 +269,7 @@ const Onboarding: React.FC = () => {
                     min="0"
                     value={formData.numElementary}
                     onChange={(e) => handleInputChange('numElementary', parseInt(e.target.value) || 0)}
+                    className="border-2 border-primary/30 focus:border-primary shadow-sm"
                   />
                 </div>
 
@@ -248,24 +281,60 @@ const Onboarding: React.FC = () => {
                     min="0"
                     value={formData.numHighSchools}
                     onChange={(e) => handleInputChange('numHighSchools', parseInt(e.target.value) || 0)}
+                    className="border-2 border-primary/30 focus:border-primary shadow-sm"
                   />
                 </div>
               </div>
             </div>
 
-            {/* File Upload */}
-            <div className="p-6 rounded-xl border-2 border-dashed border-border hover:border-primary/50 transition-colors bg-muted/30">
+            {/* Logo Upload */}
+            <div className="p-6 rounded-xl border-2 border-dashed border-primary/30 hover:border-primary/50 transition-colors bg-muted/30">
               <div className="text-center">
-                <FileSpreadsheet className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="font-medium text-foreground mb-2">העלאת קובץ השתלמויות</h3>
+                <Image className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+                <h3 className="font-medium text-foreground mb-2">העלאת לוגו פסג"ה (אופציונלי)</h3>
                 <p className="text-sm text-muted-foreground mb-4">
-                  העלו קובץ Excel או CSV עם נתוני ההשתלמויות לשנת תשפ"ה/2025
+                  העלו קובץ תמונה בפורמט PNG או JPG
                 </p>
                 
                 <label className="cursor-pointer">
                   <input
                     type="file"
-                    accept=".xlsx,.xls,.csv"
+                    accept=".png,.jpg,.jpeg"
+                    onChange={handleLogoUpload}
+                    className="hidden"
+                  />
+                  <Button type="button" variant="outline" className="gap-2">
+                    <Upload className="h-4 w-4" />
+                    בחר לוגו
+                  </Button>
+                </label>
+
+                {logoFile && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mt-4 flex items-center justify-center gap-2 text-green-600"
+                  >
+                    <Image className="h-4 w-4" />
+                    <span className="text-sm">{logoFile.name}</span>
+                  </motion.div>
+                )}
+              </div>
+            </div>
+
+            {/* Training File Upload */}
+            <div className="p-6 rounded-xl border-2 border-dashed border-primary/30 hover:border-primary/50 transition-colors bg-muted/30">
+              <div className="text-center">
+                <FileSpreadsheet className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="font-medium text-foreground mb-2">העלאת קובץ השתלמויות *</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  העלו קובץ PDF, Excel או CSV עם נתוני ההשתלמויות לשנת תשפ"ה/2025
+                </p>
+                
+                <label className="cursor-pointer">
+                  <input
+                    type="file"
+                    accept=".xlsx,.xls,.csv,.pdf"
                     onChange={handleFileUpload}
                     className="hidden"
                   />
@@ -279,10 +348,59 @@ const Onboarding: React.FC = () => {
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="mt-4 flex items-center justify-center gap-2 text-success"
+                    className="mt-4 flex items-center justify-center gap-2 text-green-600"
                   >
-                    <Check className="h-4 w-4" />
+                    <FileSpreadsheet className="h-4 w-4" />
                     <span className="text-sm">{uploadedFile.name}</span>
+                  </motion.div>
+                )}
+              </div>
+            </div>
+
+            {/* Additional Files Upload */}
+            <div className="p-6 rounded-xl border-2 border-dashed border-primary/30 hover:border-primary/50 transition-colors bg-muted/30">
+              <div className="text-center">
+                <Plus className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+                <h3 className="font-medium text-foreground mb-2">קבצים נוספים (אופציונלי)</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  העלו קבצים נוספים שיכולים לסייע בתהליך
+                </p>
+                
+                <label className="cursor-pointer">
+                  <input
+                    type="file"
+                    multiple
+                    onChange={handleAdditionalFileUpload}
+                    className="hidden"
+                  />
+                  <Button type="button" variant="outline" className="gap-2">
+                    <Upload className="h-4 w-4" />
+                    הוסף קבצים
+                  </Button>
+                </label>
+
+                {additionalFiles.length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mt-4 space-y-2"
+                  >
+                    {additionalFiles.map((file, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-center gap-2 text-primary bg-primary/10 rounded-lg px-3 py-2"
+                      >
+                        <File className="h-4 w-4" />
+                        <span className="text-sm">{file.name}</span>
+                        <button
+                          type="button"
+                          onClick={() => removeAdditionalFile(index)}
+                          className="hover:text-destructive transition-colors"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ))}
                   </motion.div>
                 )}
               </div>

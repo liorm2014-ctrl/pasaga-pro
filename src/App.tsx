@@ -10,6 +10,7 @@ import Dashboard from "./pages/Dashboard";
 import Reflection from "./pages/Reflection";
 import Vision from "./pages/Vision";
 import Output from "./pages/Output";
+import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
             <Route path="/reflection" element={<Reflection />} />
             <Route path="/vision" element={<Vision />} />
             <Route path="/output" element={<Output />} />
+            <Route path="/admin" element={<Admin />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

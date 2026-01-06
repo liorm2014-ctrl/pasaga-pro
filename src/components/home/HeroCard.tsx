@@ -25,7 +25,8 @@ const HeroCard: React.FC = () => {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="text-4xl md:text-5xl font-extrabold mb-6 text-primary"
+          className="text-4xl md:text-5xl font-extrabold mb-6"
+          style={{ color: 'rgba(212, 175, 55, 0.6)' }}
         >
           פסג"ה פורצת דרך
         </motion.h1>
@@ -39,14 +40,6 @@ const HeroCard: React.FC = () => {
           מסע מנהיגותי לניתוח, רפלקציה וחזון אסטרטגי. שלבו בינה מלאכותית עם מתודולוגיה מקצועית ליצירת תוכנית עבודה שנתית
           מותאמת אישית.
         </motion.p>
-
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="flex justify-center">
-          <Link to="/onboarding">
-            <Button size="lg" className="bg-amber-400 hover:bg-amber-500 text-primary font-bold border-amber-500">
-              התחל
-            </Button>
-          </Link>
-        </motion.div>
       </div>
     </motion.div>
   );
