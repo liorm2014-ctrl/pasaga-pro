@@ -37,11 +37,10 @@ const Header: React.FC = () => {
             whileHover={{ scale: 1.02 }}
           >
             <div className="relative h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-glow">
-              <span className="text-xl font-bold text-primary-foreground">ט</span>
+              <span className="text-xl font-bold text-primary-foreground">פ</span>
             </div>
             <div className="hidden sm:block">
-              <h1 className="text-lg font-bold gradient-text">טיפ טופ בפסג"ה</h1>
-              <p className="text-xs text-muted-foreground">מחוז דרום</p>
+              <h1 className="text-lg font-bold gradient-text">פסג"ה פורצת דרך</h1>
             </div>
           </motion.div>
         </Link>
