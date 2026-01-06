@@ -172,18 +172,6 @@ const Onboarding: React.FC = () => {
             {/* Personal Details */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="fullName">שם מלא *</Label>
-                <Input
-                  id="fullName"
-                  value={formData.fullName}
-                  onChange={(e) => handleInputChange('fullName', e.target.value)}
-                  placeholder="שם פרטי ומשפחה"
-                  required
-                  className="border-2 border-primary/30 focus:border-primary shadow-sm"
-                />
-              </div>
-
-              <div className="space-y-2">
                 <Label htmlFor="gender">מגדר</Label>
                 <Select 
                   value={formData.gender} 
@@ -198,6 +186,18 @@ const Onboarding: React.FC = () => {
                     <SelectItem value="other">אחר</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="fullName">שם מלא *</Label>
+                <Input
+                  id="fullName"
+                  value={formData.fullName}
+                  onChange={(e) => handleInputChange('fullName', e.target.value)}
+                  placeholder="שם פרטי ומשפחה"
+                  required
+                  className="border-2 border-primary/30 focus:border-primary shadow-sm"
+                />
               </div>
             </div>
 
@@ -288,8 +288,8 @@ const Onboarding: React.FC = () => {
             </div>
 
             {/* Logo Upload */}
-            <div className="p-6 rounded-xl border-2 border-dashed border-primary/30 hover:border-primary/50 transition-colors bg-muted/30">
-            <div className="text-center">
+            <div className="p-6 rounded-xl border-2 border-dashed border-primary/30 hover:border-primary/50 transition-colors" style={{ backgroundColor: 'rgba(135, 206, 250, 0.2)' }}>
+              <div className="text-center">
                 <Image className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
                 <h3 className="font-medium text-foreground mb-2">העלאת לוגו פסג"ה</h3>
                 <p className="text-sm text-muted-foreground mb-4">
@@ -323,8 +323,8 @@ const Onboarding: React.FC = () => {
             </div>
 
             {/* Training File Upload */}
-            <div className="p-6 rounded-xl border-2 border-dashed border-primary/30 hover:border-primary/50 transition-colors bg-muted/30">
-            <div className="text-center">
+            <div className="p-6 rounded-xl border-2 border-dashed border-primary/30 hover:border-primary/50 transition-colors" style={{ backgroundColor: 'rgba(135, 206, 250, 0.2)' }}>
+              <div className="text-center">
                 <FileSpreadsheet className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                 <h3 className="font-medium text-foreground mb-2">העלאת קובץ השתלמויות *</h3>
                 <p className="text-sm text-muted-foreground mb-4">
@@ -358,7 +358,7 @@ const Onboarding: React.FC = () => {
             </div>
 
             {/* Additional Files Upload */}
-            <div className="p-6 rounded-xl border-2 border-dashed border-primary/30 hover:border-primary/50 transition-colors bg-muted/30">
+            <div className="p-6 rounded-xl border-2 border-dashed border-primary/30 hover:border-primary/50 transition-colors" style={{ backgroundColor: 'rgba(135, 206, 250, 0.2)' }}>
               <div className="text-center">
                 <Plus className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
                 <h3 className="font-medium text-foreground mb-2">קבצים נוספים (אופציונלי)</h3>
@@ -412,7 +412,8 @@ const Onboarding: React.FC = () => {
                 type="submit" 
                 size="lg"
                 disabled={isSubmitting}
-                className="gap-2"
+                className="gap-2 text-white border-0"
+                style={{ backgroundColor: '#d4af37' }}
               >
                 {isSubmitting ? 'שומר...' : 'שמור והמשך'}
                 <ArrowLeft className="h-4 w-4" />
