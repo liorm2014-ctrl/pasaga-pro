@@ -22,6 +22,7 @@ const journeySteps = [
     link: '/onboarding',
     statusField: 'onboardingCompleted' as const,
     icon: FileText,
+    iconColor: '#ef6b6b', // light red
   },
   {
     number: '02',
@@ -30,6 +31,7 @@ const journeySteps = [
     link: '/dashboard',
     statusField: 'dashboardVisited' as const,
     icon: BarChart3,
+    iconColor: '#f59e0b', // orange
   },
   {
     number: '03',
@@ -38,6 +40,7 @@ const journeySteps = [
     link: '/reflection',
     statusField: 'reflectionCompleted' as const,
     icon: MessageCircle,
+    iconColor: '#d4af37', // gold
   },
   {
     number: '04',
@@ -46,6 +49,7 @@ const journeySteps = [
     link: '/vision',
     statusField: 'visionCompleted' as const,
     icon: Rocket,
+    iconColor: '#6b8e23', // olive green
   },
   {
     number: '05',
@@ -54,6 +58,7 @@ const journeySteps = [
     link: '/output',
     statusField: null,
     icon: Download,
+    iconColor: '#1e3a5f', // dark blue
   },
 ];
 
@@ -120,13 +125,11 @@ const JourneySteps: React.FC = () => {
                   </div>
 
                   {/* Status Icon */}
-                  <div className={cn(
-                    "w-12 h-12 rounded-xl flex items-center justify-center mb-4",
-                    status === 'completed' && "bg-success/10 text-success",
-                    status === 'in-progress' && "bg-warning/10 text-warning",
-                    status === 'not-started' && "bg-primary/10 text-primary"
-                  )}>
-                    <Icon className="h-6 w-6" />
+                  <div 
+                    className="w-12 h-12 rounded-xl flex items-center justify-center mb-4"
+                    style={{ backgroundColor: `${step.iconColor}20` }}
+                  >
+                    <Icon className="h-6 w-6" style={{ color: step.iconColor }} />
                   </div>
 
                   <h3 className="font-bold text-foreground mb-2">{step.title}</h3>

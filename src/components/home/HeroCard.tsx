@@ -25,8 +25,8 @@ const HeroCard: React.FC = () => {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="text-4xl md:text-5xl font-extrabold mb-6"
-          style={{ color: 'rgba(212, 175, 55, 0.6)' }}
+          className="text-4xl md:text-5xl font-extrabold mb-6 text-primary px-6 py-2 rounded-xl inline-block"
+          style={{ backgroundColor: 'rgba(212, 175, 55, 0.3)' }}
         >
           פסג"ה פורצת דרך
         </motion.h1>
