@@ -25,8 +25,8 @@ const journeySteps = [
   },
   {
     number: '02',
-    title: 'ניתוח פדגוגי',
-    description: 'דשבורד ויזואלי המציג ניתוח מעמיק של נתוני ההשתלמויות',
+    title: 'דשבורד פדגוגי',
+    description: 'ניתוח ויזואלי של נתוני ההשתלמויות עם תובנות מעמיקות',
     link: '/dashboard',
     statusField: 'dashboardVisited' as const,
     icon: BarChart3,
@@ -34,7 +34,7 @@ const journeySteps = [
   {
     number: '03',
     title: 'שיחה רפלקטיבית',
-    description: 'דיאלוג מנהיגותי עם סוכן AI לחשיבה אסטרטגית',
+    description: 'דיאלוג עם מנטור AI לרפלקציה מקצועית וחשיבה אסטרטגית',
     link: '/reflection',
     statusField: 'reflectionCompleted' as const,
     icon: MessageCircle,
@@ -42,7 +42,7 @@ const journeySteps = [
   {
     number: '04',
     title: 'חזון וקפיצה',
-    description: 'בניית תוכנית חזון ו"הקומה הבאה" של הפסג"ה',
+    description: 'ניתוח SWOT, הצבת יעדים ובניית תוכנית עבודה שנתית',
     link: '/vision',
     statusField: 'visionCompleted' as const,
     icon: Rocket,
