@@ -18,8 +18,8 @@
     --popover: 0 0% 100%;
     --popover-foreground: 220 25% 15%;
 
-    /* Primary - Rich Blue */
-    --primary: 217 91% 60%;
+    /* Primary - Dark Blue */
+    --primary: 220 70% 25%;
     --primary-foreground: 0 0% 100%;
 
     /* Secondary - Warm Cream */
@@ -30,8 +30,8 @@
     --muted: 210 30% 95%;
     --muted-foreground: 215 16% 47%;
 
-    /* Accent - Golden Yellow */
-    --accent: 38 92% 50%;
+    /* Accent - Dark Blue */
+    --accent: 220 70% 25%;
     --accent-foreground: 0 0% 100%;
 
     /* Destructive - Dark Red */
@@ -53,10 +53,10 @@
     --radius: 0.75rem;
 
     /* Custom Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(217 91% 60%) 0%, hsl(210 100% 50%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(38 92% 50%) 0%, hsl(45 93% 47%) 100%);
+    --gradient-primary: linear-gradient(135deg, hsl(220 70% 25%) 0%, hsl(220 60% 30%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(220 70% 25%) 0%, hsl(220 60% 30%) 100%);
     --gradient-hero: linear-gradient(180deg, hsl(210 40% 98%) 0%, hsl(210 50% 95%) 100%);
-    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%) 0%, hsl(210 30% 98%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100% / 0.9) 0%, hsl(210 30% 98% / 0.9) 100%);
 
     /* Shadows */
     --shadow-sm: 0 1px 2px 0 hsl(220 25% 15% / 0.05);
@@ -168,7 +168,7 @@
   }
 
   .btn-hero {
-    @apply px-8 py-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-300;
+    @apply px-8 py-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-primary;
     background: var(--gradient-accent);
   }
 
