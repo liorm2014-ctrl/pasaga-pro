@@ -6,7 +6,7 @@ import { Check, ArrowLeft, Circle } from 'lucide-react';
 
 const steps = [
   { key: 'onboardingCompleted', label: 'קליטת נתונים' },
-  { key: 'dashboardVisited', label: 'ניתוח פדגוגי' },
+  { key: 'dashboardVisited', label: 'דשבורד פדגוגי' },
   { key: 'reflectionCompleted', label: 'שיחה רפלקטיבית' },
   { key: 'visionCompleted', label: 'חזון וקפיצה' },
   { key: 'outputGenerated', label: 'תוצרים' },
