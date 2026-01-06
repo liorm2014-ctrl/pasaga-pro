@@ -289,11 +289,11 @@ const Onboarding: React.FC = () => {
 
             {/* Logo Upload */}
             <div className="p-6 rounded-xl border-2 border-dashed border-primary/30 hover:border-primary/50 transition-colors bg-muted/30">
-              <div className="text-center">
+            <div className="text-center">
                 <Image className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-                <h3 className="font-medium text-foreground mb-2">העלאת לוגו פסג"ה (אופציונלי)</h3>
+                <h3 className="font-medium text-foreground mb-2">העלאת לוגו פסג"ה</h3>
                 <p className="text-sm text-muted-foreground mb-4">
-                  העלו קובץ תמונה בפורמט PNG או JPG
+                  העלו קובץ תמונה בפורמט PNG או JPG מהמחשב או מהדרייב
                 </p>
                 
                 <label className="cursor-pointer">
@@ -324,11 +324,11 @@ const Onboarding: React.FC = () => {
 
             {/* Training File Upload */}
             <div className="p-6 rounded-xl border-2 border-dashed border-primary/30 hover:border-primary/50 transition-colors bg-muted/30">
-              <div className="text-center">
+            <div className="text-center">
                 <FileSpreadsheet className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                 <h3 className="font-medium text-foreground mb-2">העלאת קובץ השתלמויות *</h3>
                 <p className="text-sm text-muted-foreground mb-4">
-                  העלו קובץ PDF, Excel או CSV עם נתוני ההשתלמויות לשנת תשפ"ה/2025
+                  העלו קובץ PDF, Excel או CSV מהמחשב או מהדרייב
                 </p>
                 
                 <label className="cursor-pointer">
