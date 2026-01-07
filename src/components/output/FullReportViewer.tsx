@@ -62,10 +62,13 @@ const FullReportViewer: React.FC<FullReportViewerProps> = ({
   return (
     <div className="bg-white rounded-2xl shadow-xl border border-border overflow-hidden" dir="rtl">
       {/* Document Header */}
-      <div className="bg-gradient-to-l from-primary/10 to-accent/10 px-8 py-4 border-b border-border">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold text-foreground">פסג"ה - תוכנית עבודה אסטרטגית</h2>
-          <span className="text-sm text-muted-foreground">{today}</span>
+      <div className="bg-gradient-to-l from-primary/10 to-accent/10 px-8 py-6 border-b border-border">
+        <div className="text-center space-y-2">
+          <h1 className="text-3xl font-extrabold text-foreground">תוכנית עבודה אסטרטגית</h1>
+          <h2 className="text-xl font-bold text-primary">פסג"ה {user?.city || ''}</h2>
+          <p className="text-muted-foreground">
+            מוגש על ידי: <span className="font-semibold text-foreground">{user?.fullName || '—'}</span> | מחוז {user?.district || '—'}
+          </p>
         </div>
       </div>
 
@@ -242,33 +245,6 @@ const FullReportViewer: React.FC<FullReportViewerProps> = ({
                 </div>
               </div>
             </div>
-
-            {/* לזהות */}
-            <div className="bg-secondary/10 p-6 rounded-xl">
-              <h3 className="font-bold text-lg text-foreground mb-3">לזהות:</h3>
-              <ul className="space-y-2">
-                <li className="flex items-center gap-2">
-                  <span className="text-primary">•</span>
-                  <strong>חדשנות:</strong> {analysisData?.strengths?.[0] || '—'}
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="text-primary">•</span>
-                  <strong>חיבור לשטח:</strong> {analysisData?.strengths?.[1] || '—'}
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="text-primary">•</span>
-                  <strong>חוסן ארגוני:</strong> {analysisData?.opportunities?.[0] || '—'}
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="text-primary">•</span>
-                  <strong>מנהיגות:</strong> {analysisData?.opportunities?.[1] || '—'}
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="text-primary">•</span>
-                  <strong>יוזמה:</strong> {analysisData?.recommendations?.[0] || '—'}
-                </li>
-              </ul>
-            </div>
           </section>
 
           {/* ===== החסם המרכזי ופתרון ===== */}
@@ -298,11 +274,19 @@ const FullReportViewer: React.FC<FullReportViewerProps> = ({
               <p className="text-sm text-muted-foreground mb-3">איך נדע שהצלחנו?</p>
               <div className="border border-border rounded-lg overflow-hidden">
                 <table className="w-full text-right">
+                  <thead className="bg-primary/10">
+                    <tr>
+                      <th className="p-3 font-bold w-12 text-center">#</th>
+                      <th className="p-3 font-bold">יעד</th>
+                      <th className="p-3 font-bold">מדד להצלחה</th>
+                    </tr>
+                  </thead>
                   <tbody>
                     {(user?.visionPlan?.measurableGoals || ['יעד 1', 'יעד 2', 'יעד 3']).slice(0, 3).map((goal, idx) => (
                       <tr key={idx} className="border-b border-border last:border-0">
-                        <td className="p-3 bg-primary/10 font-bold w-12 text-center">{idx + 1}</td>
+                        <td className="p-3 bg-secondary/10 font-bold w-12 text-center">{idx + 1}</td>
                         <td className="p-3">{goal}</td>
+                        <td className="p-3 text-muted-foreground">{user?.visionPlan?.successMetrics?.[idx] || '—'}</td>
                       </tr>
                     ))}
                   </tbody>
