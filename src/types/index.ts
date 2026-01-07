@@ -27,6 +27,7 @@ export interface ConversationMessage {
 
 export interface VisionPlan {
   vision3Years: string;
+  unlimitedBudgetVision?: string;
   measurableGoals: string[];
   actionSteps: string[];
   expectedChallenges: string[];

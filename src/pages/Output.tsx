@@ -15,16 +15,54 @@ import {
   Quote,
   RefreshCw,
   Copy,
-  Check
+  Check,
+  TrendingUp,
+  TrendingDown,
+  Lightbulb,
+  AlertTriangle
 } from 'lucide-react';
 import { useMentorLetter } from '@/hooks/useMentorLetter';
 import { usePdfExport } from '@/hooks/usePdfExport';
+import { SwotAnalysis } from '@/types';
+import { cn } from '@/lib/utils';
 
 const Output: React.FC = () => {
   const { user, trainings } = useApp();
   const { letter, isLoading, error, generateLetter } = useMentorLetter();
   const { exportToPdf } = usePdfExport();
   const [copied, setCopied] = useState(false);
+
+  const swotAnalysis: SwotAnalysis = {
+    strengths: [
+      'מגוון רחב של השתלמויות',
+      'מספר משתתפים גבוה',
+      'צוות מנחים מקצועי',
+      'פריסה טובה לאורך השנה',
+    ],
+    weaknesses: [
+      'מיעוט השתלמויות בתחום הטכנולוגיה',
+      'קושי במעקב אחר יישום בשטח',
+      'תקציב מוגבל',
+    ],
+    opportunities: [
+      'שילוב כלי AI בהשתלמויות',
+      'הרחבת למידה היברידית',
+      'שיתופי פעולה עם פסג"ות נוספות',
+      'רפורמות חדשות במשרד החינוך',
+    ],
+    threats: [
+      'קיצוצים תקציביים',
+      'שינויים בדרישות הרפורמה',
+      'התמודדות עם שחיקה בצוות',
+    ],
+  };
+
+  const swotSections = [
+    { key: 'strengths', title: 'חוזקות', icon: TrendingUp, color: 'bg-success/10 text-success border-success/30' },
+    { key: 'weaknesses', title: 'חולשות', icon: TrendingDown, color: 'bg-destructive/10 text-destructive border-destructive/30' },
+    { key: 'opportunities', title: 'הזדמנויות', icon: Lightbulb, color: 'bg-primary/10 text-primary border-primary/30' },
+    { key: 'threats', title: 'איומים', icon: AlertTriangle, color: 'bg-warning/10 text-warning border-warning/30' },
+  ];
 
   const stats = useMemo(() => {
     const totalTrainings = trainings.length;
@@ -217,6 +255,46 @@ const Output: React.FC = () => {
             );
           })}
         </div>
+
+        {/* SWOT Analysis */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="card-elevated"
+        >
+          <h2 className="text-xl font-bold text-foreground mb-6">ניתוח SWOT פדגוגי</h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {swotSections.map((section) => {
+              const Icon = section.icon;
+              const items = swotAnalysis[section.key as keyof SwotAnalysis];
+              
+              return (
+                <motion.div
+                  key={section.key}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className={cn("p-4 rounded-xl border", section.color)}
+                  style={{ backgroundColor: 'rgba(var(--background), 0.5)' }}
+                >
+                  <div className="flex items-center gap-2 mb-3" style={{ textAlign: 'right' }}>
+                    <Icon className="h-5 w-5" />
+                    <h3 className="font-bold">{section.title}</h3>
+                  </div>
+                  <ul className="space-y-2" style={{ textAlign: 'right' }}>
+                    {items.map((item, index) => (
+                      <li key={index} className="text-sm flex items-start gap-2" style={{ direction: 'rtl' }}>
+                        <span className="w-1.5 h-1.5 rounded-full bg-current mt-2 flex-shrink-0" />
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </motion.div>
+              );
+            })}
+          </div>
+        </motion.div>
 
         {/* Mentor Letter Preview */}
         <motion.div
