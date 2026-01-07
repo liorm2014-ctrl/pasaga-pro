@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { 
   FileText, 
-  Mail, 
   Download,
   Share2,
   Presentation,
@@ -16,19 +15,14 @@ import {
   RefreshCw,
   Copy,
   Check,
-  TrendingUp,
-  TrendingDown,
-  Lightbulb,
-  AlertTriangle,
   FileDown,
   Eye
 } from 'lucide-react';
 import { useMentorLetter } from '@/hooks/useMentorLetter';
 import { usePdfExport } from '@/hooks/usePdfExport';
 import { useDashboardAnalysis } from '@/hooks/useDashboardAnalysis';
-import { SwotAnalysis } from '@/types';
-import { cn } from '@/lib/utils';
 import FullReportViewer from '@/components/output/FullReportViewer';
+import PedagogicalPulse from '@/components/output/PedagogicalPulse';
 
 const Output: React.FC = () => {
   const { user, trainings, updateUser } = useApp();
@@ -37,52 +31,6 @@ const Output: React.FC = () => {
   const { analysis, isLoading: analysisLoading, fetchAnalysis } = useDashboardAnalysis();
   const [copied, setCopied] = useState(false);
   const [showFullReport, setShowFullReport] = useState(false);
-
-  // Fallback static SWOT for when no AI analysis is available
-  const defaultSwot: SwotAnalysis = {
-    strengths: [
-      'מגוון רחב של השתלמויות',
-      'מספר משתתפים גבוה',
-      'צוות מנחים מקצועי',
-      'פריסה טובה לאורך השנה',
-    ],
-    weaknesses: [
-      'מיעוט השתלמויות בתחום הטכנולוגיה',
-      'קושי במעקב אחר יישום בשטח',
-      'תקציב מוגבל',
-    ],
-    opportunities: [
-      'שילוב כלי AI בהשתלמויות',
-      'הרחבת למידה היברידית',
-      'שיתופי פעולה עם פסג"ות נוספות',
-      'רפורמות חדשות במשרד החינוך',
-    ],
-    threats: [
-      'קיצוצים תקציביים',
-      'שינויים בדרישות הרפורמה',
-      'התמודדות עם שחיקה בצוות',
-    ],
-  };
-
-  // Use AI analysis SWOT if available, fallback to user's saved SWOT, then default
-  const swotAnalysis: SwotAnalysis = useMemo(() => {
-    if (analysis) {
-      return {
-        strengths: analysis.strengths || defaultSwot.strengths,
-        weaknesses: analysis.weaknesses || defaultSwot.weaknesses,
-        opportunities: analysis.opportunities || defaultSwot.opportunities,
-        threats: analysis.threats || defaultSwot.threats,
-      };
-    }
-    return user?.swotAnalysis || defaultSwot;
-  }, [analysis, user?.swotAnalysis]);
-
-  const swotSections = [
-    { key: 'strengths', title: 'חוזקות', icon: TrendingUp, color: 'bg-success/10 text-success border-success/30' },
-    { key: 'weaknesses', title: 'חולשות', icon: TrendingDown, color: 'bg-destructive/10 text-destructive border-destructive/30' },
-    { key: 'opportunities', title: 'הזדמנויות', icon: Lightbulb, color: 'bg-primary/10 text-primary border-primary/30' },
-    { key: 'threats', title: 'איומים', icon: AlertTriangle, color: 'bg-warning/10 text-warning border-warning/30' },
-  ];
 
   const stats = useMemo(() => {
     const totalTrainings = trainings.length;
@@ -198,7 +146,7 @@ const Output: React.FC = () => {
           numHighSchools: user?.numHighSchools,
         },
         stats,
-        null, // analysisData - would be passed from stored state if available
+        null,
         conversationSummary
       );
       toast.success('המכתב נוצר בהצלחה!');
@@ -223,17 +171,10 @@ const Output: React.FC = () => {
       conversation: user?.reflectionConversation?.map(msg => ({ role: msg.role, content: msg.content })),
       visionPlan: user?.visionPlan,
       mentorLetter: letter || undefined,
-      analysisData: swotAnalysis ? {
-        strengths: swotAnalysis.strengths,
-        weaknesses: swotAnalysis.weaknesses,
-        opportunities: swotAnalysis.opportunities,
-        threats: swotAnalysis.threats,
-      } : undefined,
     });
   };
 
   const handleExportGoogleDocs = () => {
-    // Create a text content for Google Docs
     const content = generateTextContent();
     const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
@@ -267,13 +208,6 @@ const Output: React.FC = () => {
     content += `שעות הדרכה: ${stats.totalHours}\n`;
     content += `ממוצע משתתפים: ${stats.avgParticipants}\n\n`;
     
-    // SWOT
-    content += `ניתוח SWOT\n${'-'.repeat(20)}\n`;
-    content += `חוזקות: ${swotAnalysis.strengths.join(', ')}\n`;
-    content += `חולשות: ${swotAnalysis.weaknesses.join(', ')}\n`;
-    content += `הזדמנויות: ${swotAnalysis.opportunities.join(', ')}\n`;
-    content += `איומים: ${swotAnalysis.threats.join(', ')}\n\n`;
-    
     // Conversation
     if (user?.reflectionConversation?.length) {
       content += `שיחה רפלקטיבית\n${'-'.repeat(20)}\n`;
@@ -285,8 +219,8 @@ const Output: React.FC = () => {
     
     // Vision
     if (user?.visionPlan) {
-      content += `תוכנית חזון\n${'-'.repeat(20)}\n`;
-      if (user.visionPlan.vision3Years) content += `חזון 3 שנים: ${user.visionPlan.vision3Years}\n\n`;
+      content += `חזון\n${'-'.repeat(20)}\n`;
+      if (user.visionPlan.myBelief) content += `"אני מאמין שלי": ${user.visionPlan.myBelief}\n\n`;
       if (user.visionPlan.unlimitedBudgetVision) content += `חזון ללא מגבלות: ${user.visionPlan.unlimitedBudgetVision}\n\n`;
     }
     
@@ -461,7 +395,6 @@ const Output: React.FC = () => {
                 user={user}
                 trainings={trainings}
                 stats={stats}
-                swotAnalysis={swotAnalysis}
                 mentorLetter={letter}
               />
             </motion.div>
@@ -500,57 +433,15 @@ const Output: React.FC = () => {
           })}
         </div>
 
-        {/* SWOT Analysis */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="card-elevated"
-        >
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-foreground">ניתוח SWOT פדגוגי (מבוסס AI)</h2>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={handleFetchAnalysis}
-              disabled={analysisLoading}
-              className="gap-2"
-            >
-              <RefreshCw className={cn("h-4 w-4", analysisLoading && "animate-spin")} />
-              {analysisLoading ? 'מנתח...' : 'רענן ניתוח'}
-            </Button>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {swotSections.map((section) => {
-              const Icon = section.icon;
-              const items = swotAnalysis[section.key as keyof SwotAnalysis];
-              
-              return (
-                <motion.div
-                  key={section.key}
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className={cn("p-4 rounded-xl border backdrop-blur-md", section.color)}
-                  style={{ backgroundColor: 'rgba(255, 255, 255, 0.6)' }}
-                >
-                  <div className="flex items-center gap-2 mb-3" style={{ textAlign: 'right' }}>
-                    <Icon className="h-5 w-5" />
-                    <h3 className="font-bold">{section.title}</h3>
-                  </div>
-                  <ul className="space-y-2" style={{ textAlign: 'right' }}>
-                    {items.map((item, index) => (
-                      <li key={index} className="text-sm flex items-start gap-2" style={{ direction: 'rtl' }}>
-                        <span className="w-1.5 h-1.5 rounded-full bg-current mt-2 flex-shrink-0" />
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-                </motion.div>
-              );
-            })}
-          </div>
-        </motion.div>
+        {/* Pedagogical Pulse Index - replaces SWOT */}
+        <PedagogicalPulse 
+          stats={stats} 
+          trainings={trainings.map(t => ({
+            category: t.category,
+            learningMethod: t.learningMethod,
+            targetAudience: t.targetAudience,
+          }))} 
+        />
 
         {/* Mentor Letter Preview */}
         <motion.div
@@ -609,7 +500,6 @@ const Output: React.FC = () => {
                 <div className="max-w-none text-foreground text-lg leading-loose whitespace-pre-wrap" style={{ maxWidth: '70ch' }}>
                   {letter.split('\n').map((paragraph, idx) => {
                     if (!paragraph.trim()) return <div key={idx} className="h-4" />;
-                    // Convert **text** to bold
                     const parts = paragraph.split(/\*\*(.*?)\*\*/g);
                     return (
                       <p key={idx} className="mb-4">

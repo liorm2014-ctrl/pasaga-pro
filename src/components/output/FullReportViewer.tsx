@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { User, SwotAnalysis, Training } from '@/types';
+import { User, Training } from '@/types';
 
 interface FullReportViewerProps {
   user?: User;
@@ -12,7 +12,6 @@ interface FullReportViewerProps {
     totalHours: number;
     avgParticipants: number;
   };
-  swotAnalysis: SwotAnalysis;
   mentorLetter?: string | null;
 }
 
@@ -20,7 +19,6 @@ const FullReportViewer: React.FC<FullReportViewerProps> = ({
   user,
   trainings,
   stats,
-  swotAnalysis,
   mentorLetter,
 }) => {
   const today = new Date().toLocaleDateString('he-IL');
@@ -103,132 +101,58 @@ const FullReportViewer: React.FC<FullReportViewerProps> = ({
             </div>
           </section>
 
-          {/* Section 3: SWOT Analysis */}
-          <section className="pb-6 border-b border-border/50">
-            <h2 className="text-xl font-bold text-primary mb-4 flex items-center gap-2">
-              <span className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm">3</span>
-              ניתוח SWOT פדגוגי
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="p-4 bg-green-50 rounded-xl border border-green-200">
-                <h3 className="font-bold text-green-700 mb-2">חוזקות</h3>
-                <ul className="space-y-1 text-sm">
-                  {swotAnalysis.strengths.map((item, i) => (
-                    <li key={i} className="flex items-start gap-2">
-                      <span className="text-green-500 mt-1">•</span>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div className="p-4 bg-red-50 rounded-xl border border-red-200">
-                <h3 className="font-bold text-red-700 mb-2">חולשות</h3>
-                <ul className="space-y-1 text-sm">
-                  {swotAnalysis.weaknesses.map((item, i) => (
-                    <li key={i} className="flex items-start gap-2">
-                      <span className="text-red-500 mt-1">•</span>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div className="p-4 bg-blue-50 rounded-xl border border-blue-200">
-                <h3 className="font-bold text-blue-700 mb-2">הזדמנויות</h3>
-                <ul className="space-y-1 text-sm">
-                  {swotAnalysis.opportunities.map((item, i) => (
-                    <li key={i} className="flex items-start gap-2">
-                      <span className="text-blue-500 mt-1">•</span>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div className="p-4 bg-amber-50 rounded-xl border border-amber-200">
-                <h3 className="font-bold text-amber-700 mb-2">איומים</h3>
-                <ul className="space-y-1 text-sm">
-                  {swotAnalysis.threats.map((item, i) => (
-                    <li key={i} className="flex items-start gap-2">
-                      <span className="text-amber-500 mt-1">•</span>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </section>
-
-          {/* Section 4: Reflective Conversation */}
+          {/* Section 3: Reflective Conversation */}
           {user?.reflectionConversation && user.reflectionConversation.length > 0 && (
             <section className="pb-6 border-b border-border/50">
               <h2 className="text-xl font-bold text-primary mb-4 flex items-center gap-2">
-                <span className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm">4</span>
-                שיחה רפלקטיבית
+                <span className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm">3</span>
+                שיחה רפלקטיבית - עיקרי הדברים
               </h2>
               <div className="space-y-4 bg-secondary/20 p-4 rounded-xl">
-                {user.reflectionConversation.map((msg, idx) => (
+                {user.reflectionConversation.slice(0, 6).map((msg, idx) => (
                   <div key={idx} className={`p-3 rounded-lg ${msg.role === 'assistant' ? 'bg-primary/10 mr-8' : 'bg-white ml-8 border border-border'}`}>
                     <div className="text-xs font-medium text-muted-foreground mb-1">
                       {msg.role === 'assistant' ? 'מנטור' : 'אני'}
                     </div>
-                    <p className="text-sm leading-relaxed">{msg.content}</p>
+                    <p className="text-sm leading-relaxed">{msg.content.slice(0, 300)}{msg.content.length > 300 ? '...' : ''}</p>
                   </div>
                 ))}
+                {user.reflectionConversation.length > 6 && (
+                  <p className="text-sm text-muted-foreground text-center">... ועוד {user.reflectionConversation.length - 6} הודעות</p>
+                )}
               </div>
             </section>
           )}
 
-          {/* Section 5: Vision Plan */}
-          {user?.visionPlan && (
+          {/* Section 4: Vision */}
+          {user?.visionPlan && (user.visionPlan.myBelief || user.visionPlan.unlimitedBudgetVision) && (
             <section className="pb-6 border-b border-border/50">
               <h2 className="text-xl font-bold text-primary mb-4 flex items-center gap-2">
-                <span className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm">5</span>
-                תוכנית חזון וקפיצה
+                <span className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm">4</span>
+                חזון
               </h2>
               
-              {user.visionPlan.vision3Years && (
+              {user.visionPlan.myBelief && (
                 <div className="mb-4">
-                  <h3 className="font-semibold text-foreground mb-2">חזון ל-3 שנים:</h3>
-                  <p className="text-base bg-secondary/30 p-4 rounded-lg">{user.visionPlan.vision3Years}</p>
+                  <h3 className="font-semibold text-foreground mb-2">"אני מאמין שלי":</h3>
+                  <p className="text-base bg-accent/10 p-4 rounded-lg">{user.visionPlan.myBelief}</p>
                 </div>
               )}
 
               {user.visionPlan.unlimitedBudgetVision && (
                 <div className="mb-4">
                   <h3 className="font-semibold text-foreground mb-2">חזון ללא מגבלות תקציב:</h3>
-                  <p className="text-base bg-accent/10 p-4 rounded-lg">{user.visionPlan.unlimitedBudgetVision}</p>
+                  <p className="text-base bg-secondary/30 p-4 rounded-lg">{user.visionPlan.unlimitedBudgetVision}</p>
                 </div>
               )}
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {user.visionPlan.measurableGoals?.some(g => g.trim()) && (
-                  <div>
-                    <h4 className="font-medium text-muted-foreground mb-2">יעדים מדידים:</h4>
-                    <ul className="space-y-1 text-sm">
-                      {user.visionPlan.measurableGoals.filter(g => g.trim()).map((g, i) => (
-                        <li key={i}>• {g}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-                {user.visionPlan.actionSteps?.some(s => s.trim()) && (
-                  <div>
-                    <h4 className="font-medium text-muted-foreground mb-2">צעדי פעולה:</h4>
-                    <ul className="space-y-1 text-sm">
-                      {user.visionPlan.actionSteps.filter(s => s.trim()).map((s, i) => (
-                        <li key={i}>• {s}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
             </section>
           )}
 
-          {/* Section 6: Mentor Letter */}
+          {/* Section 5: Mentor Letter */}
           {mentorLetter && (
             <section className="pb-6">
               <h2 className="text-xl font-bold text-primary mb-4 flex items-center gap-2">
-                <span className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm">6</span>
+                <span className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm">5</span>
                 מכתב מנטור אישי
               </h2>
               <div className="bg-gradient-to-br from-accent/5 to-primary/5 p-6 rounded-xl border border-primary/20">

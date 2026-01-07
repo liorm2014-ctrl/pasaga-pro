@@ -26,12 +26,13 @@ export interface ConversationMessage {
 }
 
 export interface VisionPlan {
-  vision3Years: string;
+  myBelief?: string; // "אני מאמין שלי"
   unlimitedBudgetVision?: string;
-  measurableGoals: string[];
-  actionSteps: string[];
-  expectedChallenges: string[];
-  requiredResources: string[];
+  vision3Years?: string;
+  measurableGoals?: string[];
+  actionSteps?: string[];
+  expectedChallenges?: string[];
+  requiredResources?: string[];
 }
 
 export interface SwotAnalysis {
