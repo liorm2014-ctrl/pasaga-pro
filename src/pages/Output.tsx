@@ -118,16 +118,107 @@ const Output: React.FC = () => {
         district: user?.district,
         city: user?.city,
         pisgaSymbol: user?.pisgaSymbol,
+        numKindergartens: user?.numKindergartens,
+        numElementary: user?.numElementary,
+        numHighSchools: user?.numHighSchools,
       },
       stats,
       conversation: user?.reflectionConversation?.map(msg => ({ role: msg.role, content: msg.content })),
       visionPlan: user?.visionPlan,
       mentorLetter: letter || undefined,
+      analysisData: swotAnalysis ? {
+        strengths: swotAnalysis.strengths,
+        weaknesses: swotAnalysis.weaknesses,
+        opportunities: swotAnalysis.opportunities,
+        threats: swotAnalysis.threats,
+      } : undefined,
     });
   };
 
-  const handleExport = (type: string) => {
-    toast.success(`מייצא ${type}...`);
+  const handleExportGoogleDocs = () => {
+    // Create a text content for Google Docs
+    const content = generateTextContent();
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `מסע-מנהיגות-${user?.fullName?.replace(/\s/g, '-') || 'דוח'}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success('הקובץ הורד! ניתן להעלות אותו ל-Google Docs');
+  };
+
+  const generateTextContent = () => {
+    let content = `מסע מנהיגות פדגוגית - דוח מסכם\n`;
+    content += `${'='.repeat(40)}\n\n`;
+    
+    // User info
+    if (user) {
+      content += `פרופיל הפסג"ה\n${'-'.repeat(20)}\n`;
+      content += `שם: ${user.fullName || ''}\n`;
+      content += `מחוז: ${user.district || ''}\n`;
+      content += `ישוב: ${user.city || ''}\n`;
+      content += `סמל: ${user.pisgaSymbol || ''}\n\n`;
+    }
+    
+    // Stats
+    content += `נתוני השתלמויות\n${'-'.repeat(20)}\n`;
+    content += `סך השתלמויות: ${stats.totalTrainings}\n`;
+    content += `סך משתתפים: ${stats.totalParticipants}\n`;
+    content += `שעות הדרכה: ${stats.totalHours}\n`;
+    content += `ממוצע משתתפים: ${stats.avgParticipants}\n\n`;
+    
+    // SWOT
+    content += `ניתוח SWOT\n${'-'.repeat(20)}\n`;
+    content += `חוזקות: ${swotAnalysis.strengths.join(', ')}\n`;
+    content += `חולשות: ${swotAnalysis.weaknesses.join(', ')}\n`;
+    content += `הזדמנויות: ${swotAnalysis.opportunities.join(', ')}\n`;
+    content += `איומים: ${swotAnalysis.threats.join(', ')}\n\n`;
+    
+    // Conversation
+    if (user?.reflectionConversation?.length) {
+      content += `שיחה רפלקטיבית\n${'-'.repeat(20)}\n`;
+      user.reflectionConversation.forEach(msg => {
+        const role = msg.role === 'assistant' ? 'מנטור' : 'אני';
+        content += `${role}: ${msg.content}\n\n`;
+      });
+    }
+    
+    // Vision
+    if (user?.visionPlan) {
+      content += `תוכנית חזון\n${'-'.repeat(20)}\n`;
+      if (user.visionPlan.vision3Years) content += `חזון 3 שנים: ${user.visionPlan.vision3Years}\n\n`;
+      if (user.visionPlan.unlimitedBudgetVision) content += `חזון ללא מגבלות: ${user.visionPlan.unlimitedBudgetVision}\n\n`;
+    }
+    
+    // Letter
+    if (letter) {
+      content += `מכתב מנטור אישי\n${'-'.repeat(20)}\n`;
+      content += letter.replace(/\*\*/g, '') + '\n';
+    }
+    
+    return content;
+  };
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const handleDownloadLetter = () => {
+    if (!letter) return;
+    const cleanLetter = letter.replace(/\*\*/g, '');
+    const blob = new Blob([cleanLetter], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `מכתב-מנטור-${user?.fullName?.replace(/\s/g, '-') || 'אישי'}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success('המכתב הורד בהצלחה!');
   };
 
   const handleCopyLetter = () => {
@@ -162,14 +253,14 @@ const Output: React.FC = () => {
       title: 'ייצוא ל-Google Docs',
       description: 'ייצוא כל הנתונים לגוגל דוקס לעריכה ושיתוף',
       icon: Download,
-      action: () => handleExport('Google Docs'),
+      action: handleExportGoogleDocs,
       color: 'bg-success/10 text-success',
     },
     {
-      title: 'שתף עם הצוות',
-      description: 'שלח דוח מסכם בדוא"ל לחברי הצוות',
+      title: 'הדפסה',
+      description: 'הדפסת הדוח ישירות מהדפדפן',
       icon: Share2,
-      action: () => handleExport('דוא"ל'),
+      action: handlePrint,
       color: 'bg-warning/10 text-warning',
     },
   ];
@@ -349,9 +440,20 @@ const Output: React.FC = () => {
 
           {letter && (
             <>
-              <div className="p-6 rounded-xl bg-secondary/30 border border-border/50">
-                <div className="prose prose-sm max-w-none text-foreground leading-relaxed whitespace-pre-wrap">
-                  {letter}
+              <div className="p-8 rounded-xl bg-secondary/30 border border-border/50" dir="rtl">
+                <div className="max-w-none text-foreground text-lg leading-loose whitespace-pre-wrap" style={{ maxWidth: '70ch' }}>
+                  {letter.split('\n').map((paragraph, idx) => {
+                    if (!paragraph.trim()) return <div key={idx} className="h-4" />;
+                    // Convert **text** to bold
+                    const parts = paragraph.split(/\*\*(.*?)\*\*/g);
+                    return (
+                      <p key={idx} className="mb-4">
+                        {parts.map((part, i) => 
+                          i % 2 === 1 ? <strong key={i} className="font-bold text-primary">{part}</strong> : part
+                        )}
+                      </p>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -364,7 +466,7 @@ const Output: React.FC = () => {
                   {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                   {copied ? 'הועתק!' : 'העתק'}
                 </Button>
-                <Button onClick={() => handleExport('הורדת מכתב')} className="gap-2">
+                <Button onClick={handleDownloadLetter} className="gap-2">
                   <Download className="h-4 w-4" />
                   הורד מכתב
                 </Button>
