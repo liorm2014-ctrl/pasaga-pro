@@ -210,6 +210,20 @@ const Output: React.FC = () => {
     window.print();
   };
 
+  const handleExportNotebookLM = () => {
+    const content = generateTextContent();
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `מסע-מנהיגות-${user?.fullName?.replace(/\s/g, '-') || 'דוח'}-notebooklm.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success('הקובץ הורד! העלה אותו ל-NotebookLM ליצירת מצגת');
+  };
+
   const handleDownloadLetter = () => {
     if (!letter) return;
     const cleanLetter = letter.replace(/\*\*/g, '');
@@ -259,6 +273,13 @@ const Output: React.FC = () => {
       icon: FileText,
       action: handleExportGoogleDocs,
       color: 'bg-success/10 text-success',
+    },
+    {
+      title: 'ייצוא ל-NotebookLM',
+      description: 'הורד קובץ להעלאה ל-NotebookLM ליצירת מצגת',
+      icon: Presentation,
+      action: handleExportNotebookLM,
+      color: 'bg-secondary text-secondary-foreground',
     },
     {
       title: 'הדפסה',
