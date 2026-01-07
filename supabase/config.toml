@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.dashboard-analysis]
 verify_jwt = false
+
+[functions.mentor-letter]
+verify_jwt = false

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Layout from '@/components/layout/Layout';
 import { motion } from 'framer-motion';
 import { useApp } from '@/context/AppContext';
@@ -12,37 +12,76 @@ import {
   Presentation,
   Sparkles,
   ExternalLink,
-  Quote
+  Quote,
+  RefreshCw,
+  Copy,
+  Check
 } from 'lucide-react';
+import { useMentorLetter } from '@/hooks/useMentorLetter';
 
 const Output: React.FC = () => {
   const { user, trainings } = useApp();
+  const { letter, isLoading, error, generateLetter } = useMentorLetter();
+  const [copied, setCopied] = useState(false);
+
+  const stats = useMemo(() => {
+    const totalTrainings = trainings.length;
+    const totalParticipants = trainings.reduce((sum, t) => sum + t.participants, 0);
+    const totalHours = trainings.reduce((sum, t) => sum + t.durationHours, 0);
+    const avgParticipants = totalTrainings > 0 ? Math.round(totalParticipants / totalTrainings) : 0;
+    return { totalTrainings, totalParticipants, totalHours, avgParticipants };
+  }, [trainings]);
+
+  const conversationSummary = useMemo(() => {
+    if (!user?.reflectionConversation?.length) return '';
+    return user.reflectionConversation
+      .filter(msg => msg.role === 'user')
+      .map(msg => msg.content)
+      .join('\n');
+  }, [user?.reflectionConversation]);
+
+  // Auto-generate letter on first load
+  useEffect(() => {
+    if (!letter && !isLoading && !error && trainings.length > 0) {
+      handleGenerateLetter();
+    }
+  }, []);
+
+  const handleGenerateLetter = async () => {
+    try {
+      await generateLetter(
+        {
+          fullName: user?.fullName,
+          gender: user?.gender,
+          district: user?.district,
+          city: user?.city,
+          pisgaSymbol: user?.pisgaSymbol,
+          numKindergartens: user?.numKindergartens,
+          numElementary: user?.numElementary,
+          numHighSchools: user?.numHighSchools,
+        },
+        stats,
+        null, // analysisData - would be passed from stored state if available
+        conversationSummary
+      );
+      toast.success('המכתב נוצר בהצלחה!');
+    } catch {
+      toast.error('שגיאה ביצירת המכתב');
+    }
+  };
 
   const handleExport = (type: string) => {
     toast.success(`מייצא ${type}...`);
-    // In real app, this would trigger actual export
   };
 
-  const mentorLetter = `
-    ${user?.gender === 'female' ? 'מנהלת' : 'מנהל'} ${user?.fullName} היקר/ה,
-
-    בסיום מסע הרפלקציה והחזון שעברת, אני רוצה לשתף אותך בכמה תובנות.
-
-    ראיתי מנהל/ת פסג"ה עם חזון ברור ומחויבות עמוקה לפיתוח מקצועי של צוותי ההוראה. 
-    הנתונים מראים פעילות עשירה עם ${trainings.length} השתלמויות ו-${trainings.reduce((sum, t) => sum + t.participants, 0)} משתתפים - 
-    זו עדות לעבודה מסורה ומתמשכת.
-
-    החוזקות שזיהיתי:
-    • יכולת לחבר בין צרכי השטח לתכנון האסטרטגי
-    • גמישות מחשבתית בהתמודדות עם אתגרים
-    • מנהיגות מקצועית המעודדת למידה והתפתחות
-
-    המלצתי האישית: המשיכו לפעול מתוך החזון, גם כשמופיעים קשיים. 
-    הדרך לקומה הבאה של הפסג"ה עוברת דרך צעדים קטנים ועקביים.
-
-    בהערכה רבה,
-    המנטור הפדגוגי
-  `;
+  const handleCopyLetter = () => {
+    if (letter) {
+      navigator.clipboard.writeText(letter);
+      setCopied(true);
+      toast.success('המכתב הועתק!');
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
 
   const inspirationalQuote = user?.gender === 'female' 
     ? "את לא רק מנהלת פסג\"ה - את בונה את הדור הבא של המורים"
@@ -60,7 +99,7 @@ const Output: React.FC = () => {
       title: 'מכתב מנטור אישי',
       description: 'מכתב מעצים ומחזק מה-AI מנטור',
       icon: Mail,
-      action: () => handleExport('מכתב מנטור'),
+      action: () => document.getElementById('mentor-letter')?.scrollIntoView({ behavior: 'smooth' }),
       color: 'bg-accent/10 text-accent',
     },
     {
@@ -163,33 +202,93 @@ const Output: React.FC = () => {
 
         {/* Mentor Letter Preview */}
         <motion.div
+          id="mentor-letter"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
           className="card-elevated"
         >
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
-              <Sparkles className="h-5 w-5 text-accent" />
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
+                <Sparkles className="h-5 w-5 text-accent" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-foreground">מכתב מנטור אישי</h2>
+                <p className="text-sm text-muted-foreground">נכתב במיוחד עבורך על ידי AI</p>
+              </div>
             </div>
-            <h2 className="text-xl font-bold text-foreground">מכתב מנטור אישי</h2>
-          </div>
-
-          <div className="p-6 rounded-xl bg-secondary/30 border border-border/50">
-            <pre className="whitespace-pre-wrap font-sans text-foreground leading-relaxed text-sm">
-              {mentorLetter}
-            </pre>
-          </div>
-
-          <div className="flex justify-end mt-4 gap-3">
-            <Button variant="outline" onClick={() => handleExport('העתקה')}>
-              העתק
-            </Button>
-            <Button onClick={() => handleExport('הורדת מכתב')} className="gap-2">
-              <Download className="h-4 w-4" />
-              הורד מכתב
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleGenerateLetter}
+              disabled={isLoading}
+              className="gap-2"
+            >
+              <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+              {isLoading ? 'יוצר...' : 'צור מחדש'}
             </Button>
           </div>
+
+          {isLoading && !letter && (
+            <div className="p-6 rounded-xl bg-secondary/30 border border-border/50">
+              <div className="space-y-3">
+                <div className="h-4 bg-muted/50 rounded animate-pulse w-3/4" />
+                <div className="h-4 bg-muted/50 rounded animate-pulse w-full" />
+                <div className="h-4 bg-muted/50 rounded animate-pulse w-5/6" />
+                <div className="h-4 bg-muted/50 rounded animate-pulse w-full" />
+                <div className="h-4 bg-muted/50 rounded animate-pulse w-2/3" />
+              </div>
+            </div>
+          )}
+
+          {error && (
+            <div className="p-6 rounded-xl bg-destructive/10 border border-destructive/20 text-center">
+              <p className="text-destructive mb-2">{error}</p>
+              <Button variant="outline" onClick={handleGenerateLetter}>
+                נסה שוב
+              </Button>
+            </div>
+          )}
+
+          {letter && (
+            <>
+              <div className="p-6 rounded-xl bg-secondary/30 border border-border/50">
+                <div className="prose prose-sm max-w-none text-foreground leading-relaxed whitespace-pre-wrap">
+                  {letter}
+                </div>
+              </div>
+
+              <div className="flex justify-end mt-4 gap-3">
+                <Button 
+                  variant="outline" 
+                  onClick={handleCopyLetter}
+                  className="gap-2"
+                >
+                  {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                  {copied ? 'הועתק!' : 'העתק'}
+                </Button>
+                <Button onClick={() => handleExport('הורדת מכתב')} className="gap-2">
+                  <Download className="h-4 w-4" />
+                  הורד מכתב
+                </Button>
+              </div>
+            </>
+          )}
+
+          {!letter && !isLoading && !error && (
+            <div className="p-8 rounded-xl bg-secondary/30 border border-border/50 text-center">
+              <Sparkles className="h-12 w-12 text-accent mx-auto mb-4" />
+              <h3 className="font-bold text-foreground mb-2">יצירת מכתב אישי</h3>
+              <p className="text-muted-foreground mb-4">
+                לחץ על הכפתור למטה ליצירת מכתב מנטור מותאם אישית
+              </p>
+              <Button onClick={handleGenerateLetter} className="gap-2">
+                <Sparkles className="h-4 w-4" />
+                צור מכתב
+              </Button>
+            </div>
+          )}
         </motion.div>
 
         {/* External Links */}
