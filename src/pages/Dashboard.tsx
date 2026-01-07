@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { useApp } from '@/context/AppContext';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 import { 
   BarChart3, 
   Users, 
@@ -15,6 +16,7 @@ import {
   Building2,
   User,
   School,
+  Lightbulb,
 } from 'lucide-react';
 import {
   PieChart,
@@ -525,6 +527,28 @@ const Dashboard: React.FC = () => {
               עם דגש על פיתוח מקצועי רב-תחומי המותאם לצרכי השדה החינוכי.
             </p>
           </div>
+        </motion.div>
+
+        {/* User Insight Question */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="card-elevated"
+          dir="rtl"
+        >
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+              <Lightbulb className="h-5 w-5 text-primary" />
+            </div>
+            <h3 className="font-bold text-foreground text-lg">תובנה מרכזית מהפילוח</h3>
+          </div>
+          <Textarea
+            value={user?.segmentationInsight || ''}
+            onChange={(e) => updateUser({ segmentationInsight: e.target.value })}
+            placeholder="מהי התובנה המרכזית שעולה מהנתונים והפילוחים שהוצגו? מה הדבר הכי משמעותי שלמדת מהניתוח?"
+            className="min-h-[120px] text-base leading-relaxed resize-none"
+          />
         </motion.div>
 
         {/* AI Analysis Section */}

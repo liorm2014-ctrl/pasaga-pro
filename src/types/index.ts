@@ -13,6 +13,7 @@ export interface User {
   reflectionConversation: ConversationMessage[];
   visionPlan?: VisionPlan;
   swotAnalysis?: SwotAnalysis;
+  segmentationInsight?: string; // תובנה מרכזית מהפילוח
   onboardingCompleted: boolean;
   dashboardVisited: boolean;
   reflectionCompleted: boolean;
