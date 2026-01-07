@@ -31,6 +31,7 @@ export interface VisionPlan {
   unlimitedBudgetVision?: string;
   vision3Years?: string;
   measurableGoals?: string[];
+  successMetrics?: string[]; // מדד להצלחה לכל יעד
   actionSteps?: string[];
   expectedChallenges?: string[];
   requiredResources?: string[];
