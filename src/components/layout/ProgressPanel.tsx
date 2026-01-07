@@ -51,7 +51,7 @@ const ProgressPanel: React.FC = () => {
     <motion.div
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-card rounded-2xl border border-border/50 p-4 shadow-card"
+      className="hidden md:block bg-card rounded-2xl border border-border/50 p-4 shadow-card"
     >
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-2">
