@@ -27,8 +27,12 @@ const MobileNav: React.FC = () => {
 
   const canNavigate = (index: number): boolean => {
     if (index === 0) return true;
-    const prevKey = steps[index - 1].key as keyof typeof user;
-    return !!user[prevKey];
+    // Check all previous steps are completed
+    for (let i = 0; i < index; i++) {
+      const stepKey = steps[i].key as keyof typeof user;
+      if (!user[stepKey]) return false;
+    }
+    return true;
   };
 
   const getStepStatus = (key: string, index: number): 'completed' | 'in-progress' | 'not-started' => {

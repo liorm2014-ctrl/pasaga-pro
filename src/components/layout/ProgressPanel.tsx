@@ -36,9 +36,12 @@ const ProgressPanel: React.FC = () => {
     // Can always go to onboarding
     if (index === 0) return true;
     
-    // Can navigate if previous step is completed
-    const prevKey = steps[index - 1].key as keyof typeof user;
-    return !!user[prevKey];
+    // Check all previous steps are completed
+    for (let i = 0; i < index; i++) {
+      const stepKey = steps[i].key as keyof typeof user;
+      if (!user[stepKey]) return false;
+    }
+    return true;
   };
 
   const handleStepClick = (step: typeof steps[0], index: number) => {
