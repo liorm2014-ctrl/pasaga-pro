@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useCallback } from 'react';
 import Layout from '@/components/layout/Layout';
 import { motion } from 'framer-motion';
 import { useApp } from '@/context/AppContext';
@@ -11,7 +11,6 @@ import {
   BookOpen,
   Download,
   ArrowLeft,
-  Sparkles
 } from 'lucide-react';
 import {
   PieChart,
@@ -28,12 +27,15 @@ import {
   LineChart,
   Line,
 } from 'recharts';
+import { useDashboardAnalysis } from '@/hooks/useDashboardAnalysis';
+import AIAnalysisSection from '@/components/dashboard/AIAnalysisSection';
 
 const COLORS = ['#3B82F6', '#F59E0B', '#10B981', '#EF4444', '#8B5CF6', '#EC4899'];
 
 const Dashboard: React.FC = () => {
   const { user, trainings, updateUser } = useApp();
   const navigate = useNavigate();
+  const { analysis, isLoading: analysisLoading, error: analysisError, fetchAnalysis } = useDashboardAnalysis();
 
   useEffect(() => {
     if (!user?.onboardingCompleted) {
@@ -64,7 +66,8 @@ const Dashboard: React.FC = () => {
     return Object.entries(grouped).map(([name, value]) => ({
       name,
       value,
-      percentage: Math.round((value / total) * 100),
+      count: value,
+      percentage: total > 0 ? Math.round((value / total) * 100) : 0,
     }));
   }, [trainings]);
 
@@ -95,6 +98,36 @@ const Dashboard: React.FC = () => {
   const renderCustomLabel = ({ name, percentage }: { name: string; percentage: number }) => {
     return `${name} ${percentage}%`;
   };
+
+  const handleFetchAnalysis = useCallback(() => {
+    const pisgahData = {
+      fullName: user?.fullName,
+      district: user?.district,
+      city: user?.city,
+      numKindergartens: user?.numKindergartens,
+      numElementary: user?.numElementary,
+      numHighSchools: user?.numHighSchools,
+    };
+
+    const trainingsData = {
+      categoryDistribution: categoryData.map(c => ({ 
+        name: c.name, 
+        count: c.count, 
+        percentage: c.percentage 
+      })),
+      audienceDistribution: audienceData,
+      monthlyTrend: monthlyData,
+    };
+
+    fetchAnalysis(pisgahData, trainingsData, stats);
+  }, [user, categoryData, audienceData, monthlyData, stats, fetchAnalysis]);
+
+  // Auto-fetch analysis on first load
+  useEffect(() => {
+    if (trainings.length > 0 && !analysis && !analysisLoading && !analysisError) {
+      handleFetchAnalysis();
+    }
+  }, [trainings.length, analysis, analysisLoading, analysisError, handleFetchAnalysis]);
 
   return (
     <Layout>
@@ -238,35 +271,13 @@ const Dashboard: React.FC = () => {
           </motion.div>
         </div>
 
-        {/* AI Analysis */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          className="card-elevated bg-gradient-to-br from-primary/5 to-accent/5"
-        >
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-              <Sparkles className="h-5 w-5 text-primary" />
-            </div>
-            <h3 className="font-bold text-foreground">ניתוח AI לפסג"ה</h3>
-          </div>
-          
-          <div className="prose prose-sm max-w-none text-foreground">
-            <p className="mb-4">
-              <strong>אפיון הפסג"ה:</strong> הפסג"ה שלך מתאפיינת בדגש משמעותי על {categoryData[0]?.name || 'פדגוגיה'}, 
-              עם התמקדות בקהל יעד מגוון. ניכר מאמץ להכליל את כלל שכבות הגיל במערכת החינוך.
-            </p>
-            <p className="mb-4">
-              <strong>חוזקות:</strong> מגוון רחב של השתלמויות ({stats.totalTrainings} השתלמויות), 
-              מספר משתתפים גבוה ({stats.totalParticipants}), ופריסה טובה על פני השנה.
-            </p>
-            <p>
-              <strong>המלצות:</strong> מומלץ לשקול הרחבת ההשתלמויות בתחום הטכנולוגיה והבינה המלאכותית, 
-              וכן לבחון אפשרויות ללמידה א-סינכרונית להגדלת הנגישות.
-            </p>
-          </div>
-        </motion.div>
+        {/* AI Analysis Section */}
+        <AIAnalysisSection
+          analysis={analysis}
+          isLoading={analysisLoading}
+          error={analysisError}
+          onRefresh={handleFetchAnalysis}
+        />
 
         {/* Next Step */}
         <div className="flex justify-end">
