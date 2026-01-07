@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Layout from '@/components/layout/Layout';
 import { motion } from 'framer-motion';
 import { useApp } from '@/context/AppContext';
@@ -10,56 +10,40 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { 
   Rocket, 
-  TrendingUp, 
-  TrendingDown,
   Lightbulb,
-  AlertTriangle,
   Plus,
   X,
   ArrowLeft,
-  Save
+  Save,
+  ExternalLink,
+  MessageCircle,
+  Sparkles
 } from 'lucide-react';
-import { SwotAnalysis, VisionPlan } from '@/types';
-import { cn } from '@/lib/utils';
+import { VisionPlan } from '@/types';
 
 const Vision: React.FC = () => {
   const { user, updateUser } = useApp();
   const navigate = useNavigate();
 
-  const [swotAnalysis] = useState<SwotAnalysis>({
-    strengths: [
-      'מגוון רחב של השתלמויות',
-      'מספר משתתפים גבוה',
-      'צוות מנחים מקצועי',
-      'פריסה טובה לאורך השנה',
-    ],
-    weaknesses: [
-      'מיעוט השתלמויות בתחום הטכנולוגיה',
-      'קושי במעקב אחר יישום בשטח',
-      'תקציב מוגבל',
-    ],
-    opportunities: [
-      'שילוב כלי AI בהשתלמויות',
-      'הרחבת למידה היברידית',
-      'שיתופי פעולה עם פסג"ות נוספות',
-      'רפורמות חדשות במשרד החינוך',
-    ],
-    threats: [
-      'קיצוצים תקציביים',
-      'שינויים בדרישות הרפורמה',
-      'התמודדות עם שחיקה בצוות',
-    ],
-  });
-
   const [visionPlan, setVisionPlan] = useState<VisionPlan>(
     user?.visionPlan || {
       vision3Years: '',
+      unlimitedBudgetVision: '',
       measurableGoals: [''],
       actionSteps: [''],
       expectedChallenges: [''],
       requiredResources: [''],
     }
   );
+
+  const suggestedIdeas = [
+    'הקמת מרכז חדשנות פדגוגית עם סטודיו הקלטות',
+    'תוכנית מנטורינג לצוותי הנחיה',
+    'שיתופי פעולה בינלאומיים עם מוסדות חינוך',
+    'פיתוח קורסים דיגיטליים אסינכרוניים',
+    'הכשרה מתקדמת בכלי AI לצוות המדריכים',
+    'מעבדת חווית למידה אינטראקטיבית',
+  ];
 
   // Remove the redirect - allow direct access to Vision page
 
@@ -93,13 +77,6 @@ const Vision: React.FC = () => {
     navigate('/output');
   };
 
-  const swotSections = [
-    { key: 'strengths', title: 'חוזקות', icon: TrendingUp, color: 'bg-success/10 text-success border-success/30' },
-    { key: 'weaknesses', title: 'חולשות', icon: TrendingDown, color: 'bg-destructive/10 text-destructive border-destructive/30' },
-    { key: 'opportunities', title: 'הזדמנויות', icon: Lightbulb, color: 'bg-primary/10 text-primary border-primary/30' },
-    { key: 'threats', title: 'איומים', icon: AlertTriangle, color: 'bg-warning/10 text-warning border-warning/30' },
-  ];
-
   return (
     <Layout>
       <motion.div
@@ -118,37 +95,85 @@ const Vision: React.FC = () => {
           </div>
         </div>
 
-        {/* SWOT Analysis */}
+        {/* Mentor Chat Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="card-elevated bg-gradient-to-br from-primary/5 to-accent/5 border-primary/20"
+        >
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <MessageCircle className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-bold text-foreground text-lg mb-1">שיחה עם מנטור מנהלי פסג"ה</h3>
+                <p className="text-muted-foreground text-sm leading-relaxed">
+                  קבל הכוונה וייעוץ מקצועי ממנטור מנוסה בתחום ניהול פסג"ה. 
+                  המנטור יסייע לך לגבש את החזון ולזהות הזדמנויות לפיתוח.
+                </p>
+              </div>
+            </div>
+            <a 
+              href="https://gemini.google.com/gem/1dzPAAN3Sok2jwxwZ3swuRQWo7S7a0IwQ?usp=sharing" 
+              target="_blank" 
+              rel="noopener noreferrer"
+            >
+              <Button className="gap-2 whitespace-nowrap">
+                <Sparkles className="h-4 w-4" />
+                התחל שיחה עם המנטור
+                <ExternalLink className="h-4 w-4" />
+              </Button>
+            </a>
+          </div>
+        </motion.div>
+
+        {/* Unlimited Budget Vision */}
         <div className="card-elevated">
-          <h2 className="text-xl font-bold text-foreground mb-6">ניתוח SWOT פדגוגי</h2>
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
+              <Lightbulb className="h-5 w-5 text-accent" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-foreground">חזון ללא מגבלות</h2>
+              <p className="text-sm text-muted-foreground">דמיין שיש לך תקציב בלתי מוגבל</p>
+            </div>
+          </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {swotSections.map((section) => {
-              const Icon = section.icon;
-              const items = swotAnalysis[section.key as keyof SwotAnalysis];
-              
-              return (
-                <motion.div
-                  key={section.key}
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className={cn("p-4 rounded-xl border", section.color)}
-                >
-                  <div className="flex items-center gap-2 mb-3">
-                    <Icon className="h-5 w-5" />
-                    <h3 className="font-bold">{section.title}</h3>
-                  </div>
-                  <ul className="space-y-2">
-                    {items.map((item, index) => (
-                      <li key={index} className="text-sm flex items-start gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-current mt-2 flex-shrink-0" />
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-                </motion.div>
-              );
-            })}
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="unlimited-vision" className="text-base font-medium">
+                איזה חזון היית רוצה להגשים אילו ניתן לך תקציב בלתי מוגבל? איזה יעדים הוא מקדם?
+              </Label>
+              <Textarea
+                id="unlimited-vision"
+                value={visionPlan.unlimitedBudgetVision || ''}
+                onChange={(e) => setVisionPlan(prev => ({ ...prev, unlimitedBudgetVision: e.target.value }))}
+                placeholder='תאר/י את החזון הגדול שלך ללא מגבלות תקציביות...'
+                className="min-h-[120px]"
+              />
+            </div>
+
+            {/* Suggested Ideas */}
+            <div className="space-y-2">
+              <Label className="text-sm text-muted-foreground">רעיונות לקידום יעדי הפסג"ה:</Label>
+              <div className="flex flex-wrap gap-2">
+                {suggestedIdeas.map((idea, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setVisionPlan(prev => ({
+                      ...prev,
+                      unlimitedBudgetVision: prev.unlimitedBudgetVision 
+                        ? `${prev.unlimitedBudgetVision}\n• ${idea}`
+                        : `• ${idea}`
+                    }))}
+                    className="px-3 py-1.5 text-sm rounded-full bg-secondary hover:bg-primary/10 hover:text-primary transition-colors border border-border/50"
+                  >
+                    {idea}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
 
