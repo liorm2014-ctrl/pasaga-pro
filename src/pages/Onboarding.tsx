@@ -35,7 +35,7 @@ const Onboarding: React.FC = () => {
   
   const [formData, setFormData] = useState({
     fullName: user?.fullName || '',
-    gender: user?.gender || 'male',
+    gender: user?.gender || '',
     district: user?.district || 'דרום',
     city: user?.city || '',
     pisgaSymbol: user?.pisgaSymbol || '',
@@ -134,6 +134,7 @@ const Onboarding: React.FC = () => {
       // Update user data
       updateUser({
         ...formData,
+        gender: formData.gender as 'male' | 'female' | '',
         onboardingCompleted: true,
       });
 
@@ -172,23 +173,6 @@ const Onboarding: React.FC = () => {
             {/* Personal Details */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="gender">מגדר</Label>
-                <Select 
-                  value={formData.gender} 
-                  onValueChange={(value) => handleInputChange('gender', value)}
-                >
-                  <SelectTrigger className="border-2 border-primary/30 focus:border-primary shadow-sm">
-                    <SelectValue placeholder="בחר מגדר" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="male">זכר</SelectItem>
-                    <SelectItem value="female">נקבה</SelectItem>
-                    <SelectItem value="other">אחר</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
                 <Label htmlFor="fullName">שם מלא *</Label>
                 <Input
                   id="fullName"
@@ -198,6 +182,23 @@ const Onboarding: React.FC = () => {
                   required
                   className="border-2 border-primary/30 focus:border-primary shadow-sm"
                 />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="gender">מגדר</Label>
+                <Select 
+                  value={formData.gender} 
+                  onValueChange={(value) => handleInputChange('gender', value)}
+                  dir="rtl"
+                >
+                  <SelectTrigger className="border-2 border-primary/30 focus:border-primary shadow-sm text-right">
+                    <SelectValue placeholder="בחר מגדר" />
+                  </SelectTrigger>
+                  <SelectContent align="end" className="text-right">
+                    <SelectItem value="male">זכר</SelectItem>
+                    <SelectItem value="female">נקבה</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
@@ -424,7 +425,7 @@ const Onboarding: React.FC = () => {
                 type="submit" 
                 size="lg"
                 disabled={isSubmitting}
-                className="gap-2 bg-sky-200 hover:bg-sky-300 text-black border border-sky-400"
+                className="gap-2 bg-sky-400 hover:bg-sky-500 text-white border-2 border-sky-600 shadow-md font-semibold"
               >
                 {isSubmitting ? 'שומר...' : 'שמור והמשך'}
                 <ArrowLeft className="h-4 w-4" />

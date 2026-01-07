@@ -1,7 +1,7 @@
 export interface User {
   id: string;
   fullName: string;
-  gender: 'male' | 'female' | 'other';
+  gender: 'male' | 'female' | '';
   district: string;
   city: string;
   pisgaSymbol: string;
