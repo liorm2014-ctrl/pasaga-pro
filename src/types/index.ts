@@ -28,6 +28,7 @@ export interface ConversationMessage {
 
 export interface VisionPlan {
   myBelief?: string; // "אני מאמין שלי"
+  flagshipAction?: string; // פעולת הדגל
   unlimitedBudgetVision?: string;
   vision3Years?: string;
   measurableGoals?: string[];
