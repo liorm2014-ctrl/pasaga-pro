@@ -191,8 +191,8 @@ const Reflection: React.FC = () => {
                       ? "bg-accent text-accent-foreground rounded-br-sm" 
                       : "bg-muted text-foreground rounded-bl-sm"
                   )}>
-                    <p className="leading-relaxed whitespace-pre-wrap">{message.content}</p>
-                    <span className="text-xs opacity-60 mt-2 block">
+                    <p className="leading-relaxed whitespace-pre-wrap text-right" dir="rtl" style={{ fontSize: '16px', lineHeight: '1.8' }}>{message.content}</p>
+                    <span className="text-xs opacity-60 mt-2 block text-right">
                       {new Date(message.timestamp).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })}
                     </span>
                   </div>
@@ -211,7 +211,7 @@ const Reflection: React.FC = () => {
                   <Bot className="h-5 w-5" />
                 </div>
                 <div className="max-w-[80%] p-4 rounded-2xl bg-muted text-foreground rounded-bl-sm">
-                  <p className="leading-relaxed whitespace-pre-wrap">{streamingContent}</p>
+                  <p className="leading-relaxed whitespace-pre-wrap text-right" dir="rtl" style={{ fontSize: '16px', lineHeight: '1.8' }}>{streamingContent}</p>
                 </div>
               </motion.div>
             )}
