@@ -1,1 +1,7 @@
 project_id = "yufsreqnhwjodgdpbrjm"
+
+[functions.reflection-chat]
+verify_jwt = false
+
+[functions.dashboard-analysis]
+verify_jwt = false
