@@ -15,7 +15,7 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 const defaultUser: User = {
   id: '1',
   fullName: '',
-  gender: 'male',
+  gender: '',
   district: 'דרום',
   city: '',
   pisgaSymbol: '',
