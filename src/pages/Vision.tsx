@@ -61,11 +61,7 @@ const Vision: React.FC = () => {
     }
   );
 
-  useEffect(() => {
-    if (!user?.reflectionCompleted) {
-      navigate('/reflection');
-    }
-  }, [user, navigate]);
+  // Remove the redirect - allow direct access to Vision page
 
   const handleArrayChange = (field: keyof VisionPlan, index: number, value: string) => {
     setVisionPlan(prev => ({

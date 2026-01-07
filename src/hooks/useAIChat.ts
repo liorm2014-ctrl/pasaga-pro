@@ -6,6 +6,7 @@ const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/reflection-c
 interface UseAIChatOptions {
   userContext?: {
     fullName?: string;
+    gender?: string;
     district?: string;
     city?: string;
     numKindergartens?: number;

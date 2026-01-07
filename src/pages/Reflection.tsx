@@ -11,14 +11,20 @@ import {
   ArrowLeft,
   Bot,
   User,
-  Sparkles
+  Sparkles,
+  Save
 } from 'lucide-react';
 import { ConversationMessage } from '@/types';
 import { cn } from '@/lib/utils';
 import { useAIChat } from '@/hooks/useAIChat';
 import { toast } from 'sonner';
 
-const initialPrompt = 'שלום! אני כאן כדי ללוות אותך במסע רפלקטיבי על ההשתלמויות והמנהיגות הפדגוגית שלך. בואו נתחיל - ספר/י לי על פעולות גדולות שנעשו בפסג"ה ומה היו האדוות של הפעולות האלה?';
+const getInitialPrompt = (gender?: string) => {
+  const isFemale = gender === 'female';
+  return isFemale 
+    ? 'שלום! אני כאן כדי ללוות אותך במסע רפלקטיבי על ההשתלמויות והמנהיגות הפדגוגית שלך. בואי נתחיל - ספרי לי על פעולות משמעותיות שנעשו בפסג"ה שלך ומה היו האדוות של הפעולות האלה?'
+    : 'שלום! אני כאן כדי ללוות אותך במסע רפלקטיבי על ההשתלמויות והמנהיגות הפדגוגית שלך. בוא נתחיל - ספר לי על פעולות משמעותיות שנעשו בפסג"ה שלך ומה היו האדוות של הפעולות האלה?';
+};
 
 const Reflection: React.FC = () => {
   const { user, updateUser, trainings } = useApp();
@@ -35,6 +41,7 @@ const Reflection: React.FC = () => {
   const { streamChat, isLoading, error } = useAIChat({
     userContext: {
       fullName: user?.fullName,
+      gender: user?.gender,
       district: user?.district,
       city: user?.city,
       numKindergartens: user?.numKindergartens,
@@ -49,12 +56,12 @@ const Reflection: React.FC = () => {
     if (messages.length === 0) {
       const initialMessage: ConversationMessage = {
         role: 'assistant',
-        content: initialPrompt,
+        content: getInitialPrompt(user?.gender),
         timestamp: new Date().toISOString(),
       };
       setMessages([initialMessage]);
     }
-  }, [messages.length]);
+  }, [messages.length, user?.gender]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -254,23 +261,27 @@ const Reflection: React.FC = () => {
           </div>
         </div>
 
-        {/* Next Step */}
-        {user?.reflectionCompleted && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mt-4 flex justify-end"
+        {/* Save and Continue Button */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mt-4 flex justify-end gap-3"
+        >
+          <Button 
+            size="lg" 
+            onClick={() => {
+              updateUser({ reflectionCompleted: true });
+              toast.success('השיחה נשמרה בהצלחה');
+              navigate('/vision');
+            }}
+            className="gap-2 bg-sky-200 hover:bg-sky-300 text-black border border-sky-400"
+            disabled={messages.length < 2}
           >
-            <Button 
-              size="lg" 
-              onClick={() => navigate('/vision')}
-              className="gap-2 bg-sky-200 hover:bg-sky-300 text-black border border-sky-400"
-            >
-              המשך לחזון וקפיצה
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-          </motion.div>
-        )}
+            <Save className="h-4 w-4" />
+            שמור והמשך לשלב החזון
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+        </motion.div>
       </motion.div>
     </Layout>
   );
