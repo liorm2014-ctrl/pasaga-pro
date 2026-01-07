@@ -7,8 +7,8 @@ import {
   FileText, 
   BarChart3, 
   MessageCircle, 
-  Rocket, 
-  Download,
+  Leaf, 
+  FileDown,
   Check,
   ArrowLeft,
   Circle
@@ -22,25 +22,25 @@ const journeySteps = [
     link: '/onboarding',
     statusField: 'onboardingCompleted' as const,
     icon: FileText,
-    iconColor: '#ef6b6b', // light red
+    iconColor: '#3b82f6', // blue (from image)
   },
   {
     number: '02',
-    title: 'דשבורד פדגוגי',
+    title: 'ניתוח פדגוגי',
     description: 'ניתוח ויזואלי של נתוני ההשתלמויות עם תובנות מעמיקות',
     link: '/dashboard',
     statusField: 'dashboardVisited' as const,
     icon: BarChart3,
-    iconColor: '#f59e0b', // orange
+    iconColor: '#22c55e', // green (from image)
   },
   {
     number: '03',
-    title: 'שיחה רפלקטיבית',
+    title: 'שיחה',
     description: 'דיאלוג עם מנטור AI לרפלקציה מקצועית וחשיבה אסטרטגית',
     link: '/reflection',
     statusField: 'reflectionCompleted' as const,
     icon: MessageCircle,
-    iconColor: '#d4af37', // gold
+    iconColor: '#d4af37', // gold (from image)
   },
   {
     number: '04',
@@ -48,8 +48,8 @@ const journeySteps = [
     description: 'ניתוח SWOT, הצבת יעדים ובניית תוכנית עבודה שנתית',
     link: '/vision',
     statusField: 'visionCompleted' as const,
-    icon: Rocket,
-    iconColor: '#6b8e23', // olive green
+    icon: Leaf,
+    iconColor: '#f97316', // orange (from image)
   },
   {
     number: '05',
@@ -57,8 +57,8 @@ const journeySteps = [
     description: 'דוחות, מכתב מנטור וייצוא לכלים חיצוניים',
     link: '/output',
     statusField: null,
-    icon: Download,
-    iconColor: '#1e3a5f', // dark blue
+    icon: FileDown,
+    iconColor: '#ef4444', // red (from image)
   },
 ];
 
