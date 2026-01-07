@@ -19,18 +19,22 @@ import {
   TrendingUp,
   TrendingDown,
   Lightbulb,
-  AlertTriangle
+  AlertTriangle,
+  FileDown,
+  Eye
 } from 'lucide-react';
 import { useMentorLetter } from '@/hooks/useMentorLetter';
 import { usePdfExport } from '@/hooks/usePdfExport';
 import { SwotAnalysis } from '@/types';
 import { cn } from '@/lib/utils';
+import FullReportViewer from '@/components/output/FullReportViewer';
 
 const Output: React.FC = () => {
   const { user, trainings } = useApp();
   const { letter, isLoading, error, generateLetter } = useMentorLetter();
   const { exportToPdf } = usePdfExport();
   const [copied, setCopied] = useState(false);
+  const [showFullReport, setShowFullReport] = useState(false);
 
   const swotAnalysis: SwotAnalysis = {
     strengths: [
@@ -236,23 +240,23 @@ const Output: React.FC = () => {
 
   const outputCards = [
     {
+      title: 'צפה בדוח המלא',
+      description: 'תצוגת מסמך מלאה עם כל הנתונים מהמסע',
+      icon: Eye,
+      action: () => setShowFullReport(true),
+      color: 'bg-accent/10 text-accent',
+    },
+    {
       title: 'ייצוא המסע המלא ל-PDF',
       description: 'קובץ PDF מקיף עם דשבורד, שיחה, חזון ומכתב מנטור',
-      icon: FileText,
+      icon: FileDown,
       action: handleExportPdf,
       color: 'bg-primary/10 text-primary',
     },
     {
-      title: 'מכתב מנטור אישי',
-      description: 'מכתב מעצים ומחזק מה-AI מנטור',
-      icon: Mail,
-      action: () => document.getElementById('mentor-letter')?.scrollIntoView({ behavior: 'smooth' }),
-      color: 'bg-accent/10 text-accent',
-    },
-    {
       title: 'ייצוא ל-Google Docs',
-      description: 'ייצוא כל הנתונים לגוגל דוקס לעריכה ושיתוף',
-      icon: Download,
+      description: 'הורד קובץ טקסט לייבוא לגוגל דוקס',
+      icon: FileText,
       action: handleExportGoogleDocs,
       color: 'bg-success/10 text-success',
     },
@@ -314,6 +318,41 @@ const Output: React.FC = () => {
             <p className="text-lg opacity-80">{user?.fullName} | פסג"ה {user?.city}</p>
           </div>
         </motion.div>
+
+        {/* Full Report Viewer Modal */}
+        {showFullReport && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
+            onClick={() => setShowFullReport(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="w-full max-w-4xl max-h-[90vh]"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex justify-end mb-2">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setShowFullReport(false)}
+                  className="gap-2"
+                >
+                  סגור
+                </Button>
+              </div>
+              <FullReportViewer
+                user={user}
+                trainings={trainings}
+                stats={stats}
+                swotAnalysis={swotAnalysis}
+                mentorLetter={letter}
+              />
+            </motion.div>
+          </motion.div>
+        )}
 
         {/* Output Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
