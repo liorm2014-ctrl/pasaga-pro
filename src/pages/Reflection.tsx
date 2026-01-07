@@ -45,11 +45,6 @@ const Reflection: React.FC = () => {
   });
 
   useEffect(() => {
-    if (!user?.dashboardVisited) {
-      navigate('/dashboard');
-      return;
-    }
-    
     // Add initial message if no conversation
     if (messages.length === 0) {
       const initialMessage: ConversationMessage = {
@@ -59,7 +54,7 @@ const Reflection: React.FC = () => {
       };
       setMessages([initialMessage]);
     }
-  }, [user, navigate, messages.length]);
+  }, [messages.length]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
