@@ -69,7 +69,7 @@ const Vision: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="rounded-xl p-6 border border-primary/20 bg-primary/5 backdrop-blur-sm"
+          className="rounded-xl p-6 border border-primary/30 bg-primary/15 backdrop-blur-sm"
         >
           <div className="flex items-center gap-3 mb-4">
             <div className="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center">
@@ -97,7 +97,7 @@ const Vision: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="rounded-xl p-6 border border-accent/20 bg-accent/5 backdrop-blur-sm"
+          className="rounded-xl p-6 border border-accent/30 bg-accent/15 backdrop-blur-sm"
         >
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
@@ -151,7 +151,7 @@ const Vision: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="rounded-xl p-6 border border-warning/20 bg-warning/5 backdrop-blur-sm"
+          className="rounded-xl p-6 border border-warning/30 bg-warning/20 backdrop-blur-sm"
         >
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div className="flex items-start gap-4">
