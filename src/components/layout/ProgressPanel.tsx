@@ -32,15 +32,8 @@ const ProgressPanel: React.FC = () => {
     return 'not-started';
   };
 
-  const canNavigate = (index: number): boolean => {
-    // Can always go to onboarding
-    if (index === 0) return true;
-    
-    // Check all previous steps are completed
-    for (let i = 0; i < index; i++) {
-      const stepKey = steps[i].key as keyof typeof user;
-      if (!user[stepKey]) return false;
-    }
+  const canNavigate = (_index: number): boolean => {
+    // Allow navigation to all steps regardless of completion
     return true;
   };
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import Layout from '@/components/layout/Layout';
 import { motion } from 'framer-motion';
 import { useApp } from '@/context/AppContext';
@@ -25,18 +25,21 @@ import {
 } from 'lucide-react';
 import { useMentorLetter } from '@/hooks/useMentorLetter';
 import { usePdfExport } from '@/hooks/usePdfExport';
+import { useDashboardAnalysis } from '@/hooks/useDashboardAnalysis';
 import { SwotAnalysis } from '@/types';
 import { cn } from '@/lib/utils';
 import FullReportViewer from '@/components/output/FullReportViewer';
 
 const Output: React.FC = () => {
-  const { user, trainings } = useApp();
+  const { user, trainings, updateUser } = useApp();
   const { letter, isLoading, error, generateLetter } = useMentorLetter();
   const { exportToPdf } = usePdfExport();
+  const { analysis, isLoading: analysisLoading, fetchAnalysis } = useDashboardAnalysis();
   const [copied, setCopied] = useState(false);
   const [showFullReport, setShowFullReport] = useState(false);
 
-  const swotAnalysis: SwotAnalysis = {
+  // Fallback static SWOT for when no AI analysis is available
+  const defaultSwot: SwotAnalysis = {
     strengths: [
       'מגוון רחב של השתלמויות',
       'מספר משתתפים גבוה',
@@ -61,6 +64,19 @@ const Output: React.FC = () => {
     ],
   };
 
+  // Use AI analysis SWOT if available, fallback to user's saved SWOT, then default
+  const swotAnalysis: SwotAnalysis = useMemo(() => {
+    if (analysis) {
+      return {
+        strengths: analysis.strengths || defaultSwot.strengths,
+        weaknesses: analysis.weaknesses || defaultSwot.weaknesses,
+        opportunities: analysis.opportunities || defaultSwot.opportunities,
+        threats: analysis.threats || defaultSwot.threats,
+      };
+    }
+    return user?.swotAnalysis || defaultSwot;
+  }, [analysis, user?.swotAnalysis]);
+
   const swotSections = [
     { key: 'strengths', title: 'חוזקות', icon: TrendingUp, color: 'bg-success/10 text-success border-success/30' },
     { key: 'weaknesses', title: 'חולשות', icon: TrendingDown, color: 'bg-destructive/10 text-destructive border-destructive/30' },
@@ -75,6 +91,83 @@ const Output: React.FC = () => {
     const avgParticipants = totalTrainings > 0 ? Math.round(totalParticipants / totalTrainings) : 0;
     return { totalTrainings, totalParticipants, totalHours, avgParticipants };
   }, [trainings]);
+
+  // Category and audience data for AI analysis
+  const categoryData = useMemo(() => {
+    const grouped = trainings.reduce((acc, t) => {
+      acc[t.category] = (acc[t.category] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+    const total = Object.values(grouped).reduce((a, b) => a + b, 0);
+    return Object.entries(grouped).map(([name, value]) => ({
+      name,
+      count: value,
+      percentage: total > 0 ? Math.round((value / total) * 100) : 0,
+    }));
+  }, [trainings]);
+
+  const audienceData = useMemo(() => {
+    const grouped = trainings.reduce((acc, t) => {
+      acc[t.targetAudience] = (acc[t.targetAudience] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+    return Object.entries(grouped).map(([name, count]) => ({ name, count }));
+  }, [trainings]);
+
+  const monthlyData = useMemo(() => {
+    const months = ['ינו', 'פבר', 'מרץ', 'אפר', 'מאי', 'יונ'];
+    return months.map((month, index) => {
+      const monthTrainings = trainings.filter(t => {
+        const date = new Date(t.date);
+        return date.getMonth() === index;
+      });
+      return {
+        month,
+        trainings: monthTrainings.length,
+        participants: monthTrainings.reduce((sum, t) => sum + t.participants, 0),
+      };
+    });
+  }, [trainings]);
+
+  const handleFetchAnalysis = useCallback(() => {
+    const pisgahData = {
+      fullName: user?.fullName,
+      district: user?.district,
+      city: user?.city,
+      numKindergartens: user?.numKindergartens,
+      numElementary: user?.numElementary,
+      numHighSchools: user?.numHighSchools,
+    };
+
+    const trainingsData = {
+      categoryDistribution: categoryData,
+      audienceDistribution: audienceData,
+      monthlyTrend: monthlyData,
+    };
+
+    fetchAnalysis(pisgahData, trainingsData, stats);
+  }, [user, categoryData, audienceData, monthlyData, stats, fetchAnalysis]);
+
+  // Auto-fetch AI analysis on load if not available
+  useEffect(() => {
+    if (trainings.length > 0 && !analysis && !analysisLoading && !user?.swotAnalysis) {
+      handleFetchAnalysis();
+    }
+  }, [trainings.length, analysis, analysisLoading, user?.swotAnalysis, handleFetchAnalysis]);
+
+  // Save SWOT analysis to user when AI analysis completes
+  useEffect(() => {
+    if (analysis && !user?.swotAnalysis) {
+      updateUser({
+        swotAnalysis: {
+          strengths: analysis.strengths || [],
+          weaknesses: analysis.weaknesses || [],
+          opportunities: analysis.opportunities || [],
+          threats: analysis.threats || [],
+        }
+      });
+    }
+  }, [analysis, user?.swotAnalysis, updateUser]);
 
   const conversationSummary = useMemo(() => {
     if (!user?.reflectionConversation?.length) return '';
@@ -414,7 +507,19 @@ const Output: React.FC = () => {
           transition={{ delay: 0.3 }}
           className="card-elevated"
         >
-          <h2 className="text-xl font-bold text-foreground mb-6">ניתוח SWOT פדגוגי</h2>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold text-foreground">ניתוח SWOT פדגוגי (מבוסס AI)</h2>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleFetchAnalysis}
+              disabled={analysisLoading}
+              className="gap-2"
+            >
+              <RefreshCw className={cn("h-4 w-4", analysisLoading && "animate-spin")} />
+              {analysisLoading ? 'מנתח...' : 'רענן ניתוח'}
+            </Button>
+          </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {swotSections.map((section) => {

@@ -274,7 +274,8 @@ const Reflection: React.FC = () => {
               toast.success('השיחה נשמרה בהצלחה');
               navigate('/vision');
             }}
-            className="gap-2 bg-sky-200 hover:bg-sky-300 text-black border border-sky-400"
+            className="gap-2 text-white border-0"
+            style={{ backgroundColor: 'rgba(30, 58, 95, 0.8)' }}
             disabled={messages.length < 2}
           >
             <Save className="h-4 w-4" />

@@ -331,9 +331,14 @@ const Vision: React.FC = () => {
           <Button variant="outline" onClick={() => navigate('/reflection')}>
             חזרה
           </Button>
-          <Button size="lg" onClick={handleSave} className="gap-2">
+          <Button 
+            size="lg" 
+            onClick={handleSave} 
+            className="gap-2 text-white border-0"
+            style={{ backgroundColor: 'rgba(30, 58, 95, 0.8)' }}
+          >
             <Save className="h-4 w-4" />
-            שמור תוכנית חזון
+            שמור והמשך
             <ArrowLeft className="h-4 w-4" />
           </Button>
         </div>

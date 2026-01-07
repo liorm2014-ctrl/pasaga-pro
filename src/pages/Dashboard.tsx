@@ -214,6 +214,20 @@ const Dashboard: React.FC = () => {
     }
   }, [trainings.length, analysis, analysisLoading, analysisError, handleFetchAnalysis]);
 
+  // Save SWOT analysis to user when AI analysis completes
+  useEffect(() => {
+    if (analysis && !user?.swotAnalysis) {
+      updateUser({
+        swotAnalysis: {
+          strengths: analysis.strengths || [],
+          weaknesses: analysis.weaknesses || [],
+          opportunities: analysis.opportunities || [],
+          threats: analysis.threats || [],
+        }
+      });
+    }
+  }, [analysis, user?.swotAnalysis, updateUser]);
+
   return (
     <Layout>
       <motion.div
@@ -525,10 +539,14 @@ const Dashboard: React.FC = () => {
         <div className="flex justify-end">
           <Button 
             size="lg" 
-            onClick={() => navigate('/reflection')}
-            className="gap-2"
+            onClick={() => {
+              updateUser({ dashboardVisited: true });
+              navigate('/reflection');
+            }}
+            className="gap-2 text-white border-0"
+            style={{ backgroundColor: 'rgba(30, 58, 95, 0.8)' }}
           >
-            המשך לשיחה רפלקטיבית
+            שמור והמשך
             <ArrowLeft className="h-4 w-4" />
           </Button>
         </div>

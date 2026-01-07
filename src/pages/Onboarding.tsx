@@ -213,7 +213,7 @@ const Onboarding: React.FC = () => {
                   id="district"
                   value={formData.district}
                   onChange={(e) => handleInputChange('district', e.target.value)}
-                  placeholder="מחוז"
+                  placeholder="בחר מחוז"
                   className="border-2 border-primary/30 focus:border-primary shadow-sm"
                 />
               </div>
@@ -425,7 +425,8 @@ const Onboarding: React.FC = () => {
                 type="submit" 
                 size="lg"
                 disabled={isSubmitting}
-                className="gap-2 bg-[#1e3a5f] hover:bg-[#2a4a73] text-white border-0 rounded-full px-8 shadow-md font-medium"
+                className="gap-2 text-white border-0 rounded-full px-8 shadow-md font-medium"
+                style={{ backgroundColor: 'rgba(30, 58, 95, 0.8)' }}
               >
                 {isSubmitting ? 'שומר...' : 'שמור והמשך'}
                 <ArrowLeft className="h-4 w-4" />
