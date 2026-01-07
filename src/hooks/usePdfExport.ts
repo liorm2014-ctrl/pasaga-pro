@@ -12,6 +12,7 @@ interface ExportData {
     numKindergartens?: number;
     numElementary?: number;
     numHighSchools?: number;
+    segmentationInsight?: string;
   };
   stats?: {
     totalTrainings: number;
@@ -39,6 +40,13 @@ interface ExportData {
     opportunities?: string[];
     threats?: string[];
   };
+  pulseMetrics?: {
+    innovation: number;
+    fieldConnection: number;
+    organizationalResilience: number;
+    leadership: number;
+    initiative: number;
+  };
 }
 
 export function usePdfExport() {
@@ -63,249 +71,305 @@ export function usePdfExport() {
         yPos = 25;
       };
 
-      const addSectionTitle = (title: string) => {
-        doc.setFontSize(20);
+      const addChapterTitle = (title: string) => {
+        doc.setFontSize(24);
         doc.setTextColor(59, 130, 246);
-        doc.text(title, rightMargin, yPos, { align: 'right' });
-        yPos += 12;
+        doc.text(title, pageWidth / 2, yPos, { align: 'center' });
+        yPos += 15;
       };
 
-      // ===== PAGE 1: COVER PAGE =====
-      doc.setFontSize(28);
-      doc.setTextColor(59, 130, 246);
-      doc.text('מסע מנהיגות פדגוגית', pageWidth / 2, 80, { align: 'center' });
-      
-      doc.setFontSize(18);
-      doc.setTextColor(100, 100, 100);
-      doc.text('דוח מסכם מקיף', pageWidth / 2, 95, { align: 'center' });
-
-      if (data.user) {
+      const addSectionTitle = (title: string) => {
         doc.setFontSize(16);
-        doc.setTextColor(0, 0, 0);
-        doc.text(`${data.user.fullName || ''}`, pageWidth / 2, 120, { align: 'center' });
-        
+        doc.setTextColor(59, 130, 246);
+        doc.text(title, rightMargin, yPos, { align: 'right' });
+        yPos += 10;
+      };
+
+      const addSubtitle = (title: string) => {
         doc.setFontSize(12);
-        doc.setTextColor(100, 100, 100);
-        doc.text(`פסג"ה ${data.user.city || ''} | מחוז ${data.user.district || ''}`, pageWidth / 2, 130, { align: 'center' });
-        doc.text(`סמל מוסד: ${data.user.pisgaSymbol || ''}`, pageWidth / 2, 140, { align: 'center' });
-      }
+        doc.setTextColor(80, 80, 80);
+        doc.text(title, rightMargin, yPos, { align: 'right' });
+        yPos += 8;
+      };
 
       const today = new Date().toLocaleDateString('he-IL');
-      doc.setFontSize(10);
-      doc.text(`תאריך הפקה: ${today}`, pageWidth / 2, 160, { align: 'center' });
+      const totalInstitutions = (data.user?.numKindergartens || 0) + 
+                                (data.user?.numElementary || 0) + 
+                                (data.user?.numHighSchools || 0);
 
-      // ===== PAGE 2: PISGAH PROFILE & STATS =====
-      addNewPage();
-      addSectionTitle('פרופיל הפסג"ה ונתונים');
-      
-      if (data.user) {
-        doc.setFontSize(12);
-        doc.setTextColor(0, 0, 0);
-        const profileData = [
-          `שם המנהל/ת: ${data.user.fullName || 'לא צוין'}`,
-          `מחוז: ${data.user.district || 'לא צוין'}`,
-          `ישוב: ${data.user.city || 'לא צוין'}`,
-          `סמל פסג"ה: ${data.user.pisgaSymbol || 'לא צוין'}`,
-          `גני ילדים: ${data.user.numKindergartens || 0}`,
-          `בתי ספר יסודיים: ${data.user.numElementary || 0}`,
-          `בתי ספר תיכוניים: ${data.user.numHighSchools || 0}`,
-        ];
-        profileData.forEach(text => {
-          doc.text(text, rightMargin, yPos, { align: 'right' });
-          yPos += 8;
-        });
-        yPos += 10;
-      }
+      // ===== PAGE 1: פרק 1 - תעודת זהות ומיפוי נתונים =====
+      addChapterTitle('פסג"ה - תוכנית עבודה אסטרטגית');
+      yPos += 5;
+      addSectionTitle('פרק 1: תעודת זהות ומיפוי נתונים');
+      yPos += 5;
 
+      doc.setFontSize(12);
+      doc.setTextColor(0, 0, 0);
+      doc.text(`סמל מוסד: ${data.user?.pisgaSymbol || 'לא צוין'}`, rightMargin, yPos, { align: 'right' });
+      yPos += 8;
+      doc.text(`ישוב: ${data.user?.city || 'לא צוין'}`, rightMargin, yPos, { align: 'right' });
+      yPos += 12;
+
+      // קהל יעד
+      addSubtitle('קהל יעד:');
+      doc.setFontSize(11);
+      doc.setTextColor(0, 0, 0);
+      doc.text(`גנים: ${data.user?.numKindergartens || 0}`, rightMargin - 10, yPos, { align: 'right' });
+      yPos += 7;
+      doc.text(`בתי ספר יסודיים: ${data.user?.numElementary || 0}`, rightMargin - 10, yPos, { align: 'right' });
+      yPos += 7;
+      doc.text(`בתי ספר תיכוניים: ${data.user?.numHighSchools || 0}`, rightMargin - 10, yPos, { align: 'right' });
+      yPos += 7;
+      doc.setFontSize(12);
+      doc.setTextColor(59, 130, 246);
+      doc.text(`סה"כ: ${totalInstitutions}`, rightMargin - 10, yPos, { align: 'right' });
+      yPos += 15;
+
+      // ניתוח פילוח השתלמויות
+      addSubtitle('ניתוח פילוח השתלמויות:');
+      doc.setFontSize(11);
+      doc.setTextColor(0, 0, 0);
       if (data.stats) {
-        doc.setFontSize(14);
-        doc.setTextColor(59, 130, 246);
-        doc.text('סיכום נתוני השתלמויות', rightMargin, yPos, { align: 'right' });
-        yPos += 10;
-        
-        doc.setFontSize(12);
-        doc.setTextColor(0, 0, 0);
-        const statsText = [
-          `סך השתלמויות: ${data.stats.totalTrainings}`,
-          `סך משתתפים: ${data.stats.totalParticipants.toLocaleString()}`,
-          `שעות הדרכה: ${data.stats.totalHours}`,
-          `ממוצע משתתפים להשתלמות: ${data.stats.avgParticipants}`,
-        ];
-        statsText.forEach(text => {
-          doc.text(text, rightMargin, yPos, { align: 'right' });
-          yPos += 8;
-        });
+        doc.text(`סה"כ השתלמויות: ${data.stats.totalTrainings}`, rightMargin - 10, yPos, { align: 'right' });
+        yPos += 7;
+        doc.text(`סה"כ משתתפים: ${data.stats.totalParticipants.toLocaleString()}`, rightMargin - 10, yPos, { align: 'right' });
+        yPos += 7;
+        doc.text(`שעות הדרכה: ${data.stats.totalHours}`, rightMargin - 10, yPos, { align: 'right' });
+        yPos += 7;
+        doc.text(`ממוצע משתתפים: ${data.stats.avgParticipants}`, rightMargin - 10, yPos, { align: 'right' });
+        yPos += 15;
       }
 
-      // ===== PAGE 3: PEDAGOGICAL ANALYSIS =====
-      if (data.analysisData) {
-        addNewPage();
-        addSectionTitle('ניתוח פדגוגי');
+      // ===== PAGE 2: תובנה מרכזית מהפילוח =====
+      addNewPage();
+      addSectionTitle('תובנה מרכזית מהפילוח:');
+      yPos += 5;
+      
+      const insight = data.user?.segmentationInsight || data.analysisData?.keyInsight || 'לא הוזנה תובנה';
+      doc.setFontSize(12);
+      doc.setTextColor(0, 0, 0);
+      const insightLines = doc.splitTextToSize(insight, maxWidth);
+      insightLines.forEach((line: string) => {
+        if (yPos > 270) { addNewPage(); }
+        doc.text(line, rightMargin, yPos, { align: 'right' });
+        yPos += 7;
+      });
 
-        if (data.analysisData.characterization) {
-          doc.setFontSize(12);
-          doc.setTextColor(59, 130, 246);
-          doc.text('אפיון הפסג"ה:', rightMargin, yPos, { align: 'right' });
-          yPos += 8;
-          doc.setFontSize(11);
-          doc.setTextColor(0, 0, 0);
-          const charLines = doc.splitTextToSize(data.analysisData.characterization, maxWidth);
-          charLines.forEach((line: string) => {
-            doc.text(line, rightMargin, yPos, { align: 'right' });
-            yPos += 6;
-          });
-          yPos += 8;
-        }
+      // ===== PAGE 3: פרק 2 - אני מאמין =====
+      addNewPage();
+      addChapterTitle('פרק 2');
+      yPos += 5;
 
-        if (data.analysisData.keyInsight) {
-          doc.setFontSize(12);
-          doc.setTextColor(59, 130, 246);
-          doc.text('תובנה מרכזית:', rightMargin, yPos, { align: 'right' });
-          yPos += 8;
-          doc.setFontSize(11);
-          doc.setTextColor(0, 0, 0);
-          const insightLines = doc.splitTextToSize(data.analysisData.keyInsight, maxWidth);
-          insightLines.forEach((line: string) => {
-            doc.text(line, rightMargin, yPos, { align: 'right' });
-            yPos += 6;
-          });
-          yPos += 8;
-        }
-
-        if (data.analysisData.recommendations?.length) {
-          doc.setFontSize(12);
-          doc.setTextColor(59, 130, 246);
-          doc.text('המלצות:', rightMargin, yPos, { align: 'right' });
-          yPos += 8;
-          doc.setFontSize(11);
-          doc.setTextColor(0, 0, 0);
-          data.analysisData.recommendations.forEach(rec => {
-            doc.text(`• ${rec}`, rightMargin - 3, yPos, { align: 'right' });
-            yPos += 7;
-          });
-        }
-      }
-
-      // ===== PAGE 4: SWOT ANALYSIS =====
-      if (data.analysisData?.strengths || data.analysisData?.weaknesses) {
-        addNewPage();
-        addSectionTitle('ניתוח SWOT');
-
-        const swotSections = [
-          { title: 'חוזקות', items: data.analysisData?.strengths || [] },
-          { title: 'חולשות', items: data.analysisData?.weaknesses || [] },
-          { title: 'הזדמנויות', items: data.analysisData?.opportunities || [] },
-          { title: 'איומים', items: data.analysisData?.threats || [] },
-        ];
-
-        swotSections.forEach(section => {
-          if (section.items.length > 0) {
-            doc.setFontSize(12);
-            doc.setTextColor(59, 130, 246);
-            doc.text(`${section.title}:`, rightMargin, yPos, { align: 'right' });
-            yPos += 8;
-            
-            doc.setFontSize(10);
-            doc.setTextColor(0, 0, 0);
-            section.items.forEach(item => {
-              if (yPos > 270) { addNewPage(); }
-              doc.text(`• ${item}`, rightMargin - 3, yPos, { align: 'right' });
-              yPos += 6;
-            });
-            yPos += 8;
-          }
-        });
-      }
-
-      // ===== PAGE 5: REFLECTIVE CONVERSATION =====
-      if (data.conversation && data.conversation.length > 0) {
-        addNewPage();
-        addSectionTitle('שיחה רפלקטיבית');
-        
-        doc.setFontSize(10);
-        data.conversation.forEach(msg => {
-          if (yPos > 260) { addNewPage(); }
-          
-          const roleLabel = msg.role === 'assistant' ? 'מנטור:' : 'אני:';
-          doc.setFontSize(11);
-          doc.setTextColor(msg.role === 'assistant' ? 59 : 139, msg.role === 'assistant' ? 130 : 92, msg.role === 'assistant' ? 246 : 246);
-          doc.text(roleLabel, rightMargin, yPos, { align: 'right' });
-          yPos += 7;
-          
-          doc.setFontSize(10);
-          doc.setTextColor(0, 0, 0);
-          const lines = doc.splitTextToSize(msg.content, maxWidth);
-          lines.forEach((line: string) => {
-            if (yPos > 275) { addNewPage(); }
-            doc.text(line, rightMargin, yPos, { align: 'right' });
-            yPos += 5;
-          });
-          yPos += 8;
-        });
-      }
-
-      // ===== PAGE 6: VISION PLAN =====
-      if (data.visionPlan) {
-        addNewPage();
-        addSectionTitle('חזון');
-
-        if (data.visionPlan.myBelief) {
-          doc.setFontSize(12);
-          doc.setTextColor(59, 130, 246);
-          doc.text('"אני מאמין שלי":', rightMargin, yPos, { align: 'right' });
-          yPos += 8;
-          doc.setFontSize(11);
-          doc.setTextColor(0, 0, 0);
-          const beliefLines = doc.splitTextToSize(data.visionPlan.myBelief, maxWidth);
-          beliefLines.forEach((line: string) => {
-            if (yPos > 275) { addNewPage(); }
-            doc.text(line, rightMargin, yPos, { align: 'right' });
-            yPos += 6;
-          });
-          yPos += 10;
-        }
-
-        if (data.visionPlan.unlimitedBudgetVision) {
-          doc.setFontSize(12);
-          doc.setTextColor(59, 130, 246);
-          doc.text('חזון ללא מגבלות תקציב:', rightMargin, yPos, { align: 'right' });
-          yPos += 8;
-          doc.setFontSize(11);
-          doc.setTextColor(0, 0, 0);
-          const unlimitedLines = doc.splitTextToSize(data.visionPlan.unlimitedBudgetVision, maxWidth);
-          unlimitedLines.forEach((line: string) => {
-            if (yPos > 275) { addNewPage(); }
-            doc.text(line, rightMargin, yPos, { align: 'right' });
-            yPos += 6;
-          });
-          yPos += 10;
-        }
-      }
-
-      // ===== PAGE 7: MENTOR LETTER =====
-      if (data.mentorLetter) {
-        addNewPage();
-        addSectionTitle('מכתב מנטור אישי');
-        
+      // אני מאמין
+      addSectionTitle('אני מאמין:');
+      if (data.visionPlan?.myBelief) {
         doc.setFontSize(11);
         doc.setTextColor(0, 0, 0);
-        // Clean asterisks for PDF
-        const cleanLetter = data.mentorLetter.replace(/\*\*/g, '');
-        const letterLines = doc.splitTextToSize(cleanLetter, maxWidth);
-        letterLines.forEach((line: string) => {
-          if (yPos > 275) { addNewPage(); }
+        const beliefLines = doc.splitTextToSize(data.visionPlan.myBelief, maxWidth);
+        beliefLines.forEach((line: string) => {
+          if (yPos > 270) { addNewPage(); }
+          doc.text(line, rightMargin, yPos, { align: 'right' });
+          yPos += 6;
+        });
+        yPos += 10;
+      }
+
+      // פעולות דגל והשפעתן
+      addSectionTitle('פעולות דגל והשפעתן:');
+      if (data.visionPlan?.actionSteps?.length) {
+        doc.setFontSize(11);
+        doc.setTextColor(0, 0, 0);
+        data.visionPlan.actionSteps.forEach((step, idx) => {
+          if (yPos > 270) { addNewPage(); }
+          doc.text(`${idx + 1}. ${step}`, rightMargin - 5, yPos, { align: 'right' });
+          yPos += 7;
+        });
+        yPos += 10;
+      }
+
+      // חזון "ללא הגבלה"
+      addSectionTitle('חזון "ללא הגבלה":');
+      if (data.visionPlan?.unlimitedBudgetVision) {
+        doc.setFontSize(11);
+        doc.setTextColor(0, 0, 0);
+        const visionLines = doc.splitTextToSize(data.visionPlan.unlimitedBudgetVision, maxWidth);
+        visionLines.forEach((line: string) => {
+          if (yPos > 270) { addNewPage(); }
           doc.text(line, rightMargin, yPos, { align: 'right' });
           yPos += 6;
         });
       }
 
-      // Footer on last page
-      doc.setFontSize(8);
-      doc.setTextColor(150, 150, 150);
-      doc.text(`נוצר בתאריך: ${today} | מסע מנהיגות פדגוגית`, pageWidth / 2, 290, { align: 'center' });
+      // ===== PAGE 4: פרק 3 - אסטרטגיית צמיחה =====
+      addNewPage();
+      addChapterTitle('פרק 3');
+      doc.setFontSize(16);
+      doc.setTextColor(80, 80, 80);
+      doc.text('אסטרטגיית צמיחה ופתרון קשיים', pageWidth / 2, yPos, { align: 'center' });
+      yPos += 15;
+
+      // מדד הדופק הפדגוגי
+      addSectionTitle('📈 מדד הדופק הפדגוגי:');
+      doc.setFontSize(11);
+      doc.setTextColor(0, 0, 0);
+      const pulseMetrics = data.pulseMetrics || {
+        innovation: 0,
+        fieldConnection: 0,
+        organizationalResilience: 0,
+        leadership: 0,
+        initiative: 0,
+      };
+      
+      const metrics = [
+        { label: 'חדשנות', value: pulseMetrics.innovation },
+        { label: 'חיבור לשטח', value: pulseMetrics.fieldConnection },
+        { label: 'חוסן ארגוני', value: pulseMetrics.organizationalResilience },
+        { label: 'מנהיגות', value: pulseMetrics.leadership },
+        { label: 'יוזמה', value: pulseMetrics.initiative },
+      ];
+
+      metrics.forEach(metric => {
+        doc.text(`${metric.label}: ${metric.value}%`, rightMargin - 10, yPos, { align: 'right' });
+        yPos += 7;
+      });
+      yPos += 10;
+
+      // לזהות
+      addSectionTitle('לזהות:');
+      const identifyItems = [
+        { label: 'חדשנות', value: data.analysisData?.strengths?.[0] || '—' },
+        { label: 'חיבור לשטח', value: data.analysisData?.strengths?.[1] || '—' },
+        { label: 'חוסן ארגוני', value: data.analysisData?.opportunities?.[0] || '—' },
+        { label: 'מנהיגות', value: data.analysisData?.opportunities?.[1] || '—' },
+        { label: 'יוזמה', value: data.analysisData?.recommendations?.[0] || '—' },
+      ];
+      
+      doc.setFontSize(10);
+      identifyItems.forEach(item => {
+        if (yPos > 270) { addNewPage(); }
+        doc.text(`• ${item.label}: ${item.value}`, rightMargin - 5, yPos, { align: 'right' });
+        yPos += 6;
+      });
+
+      // ===== PAGE 5: החסם המרכזי ויעדים =====
+      addNewPage();
+      
+      // החסם המרכזי
+      addSectionTitle('החסם המרכזי שזוהה:');
+      doc.setFontSize(11);
+      doc.setTextColor(0, 0, 0);
+      const obstacle = data.analysisData?.weaknesses?.[0] || data.visionPlan?.expectedChallenges?.[0] || 'לא זוהה';
+      const obstacleLines = doc.splitTextToSize(obstacle, maxWidth);
+      obstacleLines.forEach((line: string) => {
+        doc.text(line, rightMargin, yPos, { align: 'right' });
+        yPos += 6;
+      });
+      yPos += 10;
+
+      // נתיב פתרון
+      addSectionTitle('נתיב פתרון יצירתי:');
+      const solution = data.analysisData?.recommendations?.[0] || 'לא הוזן';
+      const solutionLines = doc.splitTextToSize(solution, maxWidth);
+      solutionLines.forEach((line: string) => {
+        doc.text(line, rightMargin, yPos, { align: 'right' });
+        yPos += 6;
+      });
+      yPos += 10;
+
+      // יעדי ליבה
+      addSectionTitle('יעדי ליבה:');
+      doc.setFontSize(10);
+      doc.text('איך נדע שהצלחנו?', rightMargin, yPos, { align: 'right' });
+      yPos += 8;
+      
+      const goals = data.visionPlan?.measurableGoals || [];
+      goals.slice(0, 3).forEach((goal, idx) => {
+        doc.text(`${idx + 1}. ${goal}`, rightMargin - 5, yPos, { align: 'right' });
+        yPos += 7;
+      });
+      yPos += 10;
+
+      // התרשמות המנטור
+      addSectionTitle('התרשמות המנטור - סיכום תובנות:');
+      if (data.analysisData?.characterization) {
+        const charLines = doc.splitTextToSize(data.analysisData.characterization, maxWidth);
+        charLines.forEach((line: string) => {
+          if (yPos > 270) { addNewPage(); }
+          doc.text(line, rightMargin, yPos, { align: 'right' });
+          yPos += 6;
+        });
+      }
+
+      // ===== PAGE 6: תוכנית פעולה =====
+      addNewPage();
+      addSectionTitle('תוכנית פעולה למימוש החזון');
+      yPos += 5;
+
+      if (data.visionPlan?.actionSteps?.length) {
+        doc.setFontSize(11);
+        data.visionPlan.actionSteps.forEach((step, idx) => {
+          if (yPos > 270) { addNewPage(); }
+          doc.text(`${idx + 1}. ${step}`, rightMargin - 5, yPos, { align: 'right' });
+          yPos += 8;
+        });
+      } else {
+        doc.text('לא הוזנה תוכנית פעולה', rightMargin, yPos, { align: 'right' });
+      }
+
+      // ===== PAGE 7: מכתב מהמנטור =====
+      if (data.mentorLetter) {
+        addNewPage();
+        addSectionTitle('מכתב מהמנטור בנימה אישית');
+        yPos += 5;
+        
+        doc.setFontSize(11);
+        doc.setTextColor(0, 0, 0);
+        const cleanLetter = data.mentorLetter.replace(/\*\*/g, '');
+        const letterLines = doc.splitTextToSize(cleanLetter, maxWidth);
+        letterLines.forEach((line: string) => {
+          if (yPos > 260) { addNewPage(); }
+          doc.text(line, rightMargin, yPos, { align: 'right' });
+          yPos += 6;
+        });
+      }
+
+      // ===== משפט השראה אישי =====
+      yPos += 15;
+      if (yPos > 230) { addNewPage(); yPos = 80; }
+      
+      doc.setFontSize(14);
+      doc.setTextColor(59, 130, 246);
+      doc.text('משפט השראה אישי:', pageWidth / 2, yPos, { align: 'center' });
+      yPos += 12;
+      
+      const inspirationalQuote = data.user?.gender === 'female' 
+        ? '"את לא רק מנהלת פסג"ה - את בונה את הדור הבא של המורים"'
+        : '"אתה לא רק מנהל פסג"ה - אתה בונה את הדור הבא של המורים"';
+      
+      doc.setFontSize(12);
+      doc.setTextColor(0, 0, 0);
+      doc.text(inspirationalQuote, pageWidth / 2, yPos, { align: 'center' });
+      yPos += 15;
+      
+      doc.setFontSize(14);
+      doc.text(data.user?.fullName || '', pageWidth / 2, yPos, { align: 'center' });
+      yPos += 8;
+      doc.setFontSize(11);
+      doc.setTextColor(100, 100, 100);
+      doc.text(`מחוז ${data.user?.district || ''}`, pageWidth / 2, yPos, { align: 'center' });
+
+      // Footer
+      yPos = 280;
+      doc.setFontSize(10);
+      doc.setTextColor(59, 130, 246);
+      doc.text('פסג"ה פורצת דרך | מערכת חכמה למנהלי פסג"ה', pageWidth / 2, yPos, { align: 'center' });
+      yPos += 6;
+      doc.setFontSize(9);
+      doc.setTextColor(100, 100, 100);
+      doc.text(`תאריך הפקה: ${today}`, pageWidth / 2, yPos, { align: 'center' });
 
       // Save the PDF
-      const fileName = `מסע-מנהיגות-${data.user?.fullName?.replace(/\s/g, '-') || 'דוח'}.pdf`;
+      const fileName = `תוכנית-אסטרטגית-${data.user?.fullName?.replace(/\s/g, '-') || 'דוח'}.pdf`;
       doc.save(fileName);
       
       toast.success('קובץ PDF נוצר בהצלחה!');

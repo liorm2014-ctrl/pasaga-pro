@@ -155,6 +155,21 @@ const Output: React.FC = () => {
     }
   };
 
+  // Calculate pulse metrics based on training data
+  const pulseMetrics = useMemo(() => {
+    const categoryCount = categoryData.length;
+    const hasVariedMethods = trainings.some(t => t.learningMethod !== 'פרונטלי');
+    const hasMultipleAudiences = audienceData.length > 1;
+    
+    return {
+      innovation: Math.min(100, Math.round((categoryCount / 7) * 100 * 0.8 + (hasVariedMethods ? 20 : 0))),
+      fieldConnection: Math.min(100, Math.round((stats.totalParticipants / Math.max(stats.totalTrainings, 1)) * 2)),
+      organizationalResilience: Math.min(100, Math.round((stats.totalTrainings / 20) * 100)),
+      leadership: Math.min(100, Math.round((hasMultipleAudiences ? 60 : 30) + (stats.totalHours / 50) * 40)),
+      initiative: Math.min(100, Math.round((categoryCount / 5) * 50 + (audienceData.length / 4) * 50)),
+    };
+  }, [categoryData, audienceData, trainings, stats]);
+
   const handleExportPdf = async () => {
     await exportToPdf({
       user: {
@@ -166,11 +181,22 @@ const Output: React.FC = () => {
         numKindergartens: user?.numKindergartens,
         numElementary: user?.numElementary,
         numHighSchools: user?.numHighSchools,
+        segmentationInsight: user?.segmentationInsight,
       },
       stats,
       conversation: user?.reflectionConversation?.map(msg => ({ role: msg.role, content: msg.content })),
       visionPlan: user?.visionPlan,
       mentorLetter: letter || undefined,
+      analysisData: analysis ? {
+        characterization: analysis.characterization,
+        keyInsight: analysis.keyInsight,
+        recommendations: analysis.recommendations,
+        strengths: analysis.strengths,
+        weaknesses: analysis.weaknesses,
+        opportunities: analysis.opportunities,
+        threats: analysis.threats,
+      } : undefined,
+      pulseMetrics,
     });
   };
 
@@ -396,6 +422,16 @@ const Output: React.FC = () => {
                 trainings={trainings}
                 stats={stats}
                 mentorLetter={letter}
+                analysisData={analysis ? {
+                  characterization: analysis.characterization,
+                  keyInsight: analysis.keyInsight,
+                  recommendations: analysis.recommendations,
+                  strengths: analysis.strengths,
+                  weaknesses: analysis.weaknesses,
+                  opportunities: analysis.opportunities,
+                  threats: analysis.threats,
+                } : undefined}
+                pulseMetrics={pulseMetrics}
               />
             </motion.div>
           </motion.div>
