@@ -21,11 +21,12 @@ interface ExportData {
   };
   conversation?: Array<{ role: string; content: string }>;
   visionPlan?: {
-    vision3Years: string;
-    measurableGoals: string[];
-    actionSteps: string[];
-    expectedChallenges: string[];
-    requiredResources: string[];
+    myBelief?: string;
+    vision3Years?: string;
+    measurableGoals?: string[];
+    actionSteps?: string[];
+    expectedChallenges?: string[];
+    requiredResources?: string[];
     unlimitedBudgetVision?: string;
   };
   mentorLetter?: string;
@@ -246,17 +247,17 @@ export function usePdfExport() {
       // ===== PAGE 6: VISION PLAN =====
       if (data.visionPlan) {
         addNewPage();
-        addSectionTitle('תוכנית חזון וקפיצה');
+        addSectionTitle('חזון');
 
-        if (data.visionPlan.vision3Years) {
+        if (data.visionPlan.myBelief) {
           doc.setFontSize(12);
           doc.setTextColor(59, 130, 246);
-          doc.text('חזון ל-3 שנים:', rightMargin, yPos, { align: 'right' });
+          doc.text('"אני מאמין שלי":', rightMargin, yPos, { align: 'right' });
           yPos += 8;
           doc.setFontSize(11);
           doc.setTextColor(0, 0, 0);
-          const visionLines = doc.splitTextToSize(data.visionPlan.vision3Years, maxWidth);
-          visionLines.forEach((line: string) => {
+          const beliefLines = doc.splitTextToSize(data.visionPlan.myBelief, maxWidth);
+          beliefLines.forEach((line: string) => {
             if (yPos > 275) { addNewPage(); }
             doc.text(line, rightMargin, yPos, { align: 'right' });
             yPos += 6;
@@ -279,33 +280,6 @@ export function usePdfExport() {
           });
           yPos += 10;
         }
-
-        const sections = [
-          { title: 'יעדים מדידים', items: data.visionPlan.measurableGoals },
-          { title: 'צעדי פעולה', items: data.visionPlan.actionSteps },
-          { title: 'אתגרים צפויים', items: data.visionPlan.expectedChallenges },
-          { title: 'משאבים נדרשים', items: data.visionPlan.requiredResources },
-        ];
-
-        sections.forEach(section => {
-          if (section.items?.some(item => item.trim())) {
-            if (yPos > 240) { addNewPage(); }
-            
-            doc.setFontSize(11);
-            doc.setTextColor(100, 100, 100);
-            doc.text(`${section.title}:`, rightMargin, yPos, { align: 'right' });
-            yPos += 7;
-            
-            doc.setFontSize(10);
-            doc.setTextColor(0, 0, 0);
-            section.items.filter(item => item.trim()).forEach(item => {
-              if (yPos > 275) { addNewPage(); }
-              doc.text(`• ${item}`, rightMargin - 3, yPos, { align: 'right' });
-              yPos += 6;
-            });
-            yPos += 6;
-          }
-        });
       }
 
       // ===== PAGE 7: MENTOR LETTER =====
