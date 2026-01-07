@@ -18,10 +18,12 @@ import {
   Check
 } from 'lucide-react';
 import { useMentorLetter } from '@/hooks/useMentorLetter';
+import { usePdfExport } from '@/hooks/usePdfExport';
 
 const Output: React.FC = () => {
   const { user, trainings } = useApp();
   const { letter, isLoading, error, generateLetter } = useMentorLetter();
+  const { exportToPdf } = usePdfExport();
   const [copied, setCopied] = useState(false);
 
   const stats = useMemo(() => {
@@ -70,6 +72,22 @@ const Output: React.FC = () => {
     }
   };
 
+  const handleExportPdf = async () => {
+    await exportToPdf({
+      user: {
+        fullName: user?.fullName,
+        gender: user?.gender,
+        district: user?.district,
+        city: user?.city,
+        pisgaSymbol: user?.pisgaSymbol,
+      },
+      stats,
+      conversation: user?.reflectionConversation?.map(msg => ({ role: msg.role, content: msg.content })),
+      visionPlan: user?.visionPlan,
+      mentorLetter: letter || undefined,
+    });
+  };
+
   const handleExport = (type: string) => {
     toast.success(`מייצא ${type}...`);
   };
@@ -89,10 +107,10 @@ const Output: React.FC = () => {
 
   const outputCards = [
     {
-      title: 'דוח מלא',
-      description: 'דוח PDF מקיף עם כל הנתונים, גרפים וניתוחים',
+      title: 'ייצוא המסע המלא ל-PDF',
+      description: 'קובץ PDF מקיף עם דשבורד, שיחה, חזון ומכתב מנטור',
       icon: FileText,
-      action: () => handleExport('דוח PDF'),
+      action: handleExportPdf,
       color: 'bg-primary/10 text-primary',
     },
     {
