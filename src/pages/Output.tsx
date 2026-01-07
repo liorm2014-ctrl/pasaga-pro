@@ -259,22 +259,140 @@ const Output: React.FC = () => {
     return content;
   };
 
+  // Generate presentation-optimized content for NotebookLM
+  const generatePresentationContent = () => {
+    let content = '';
+    
+    // Slide 1: Title
+    content += `# תוכנית עבודה אסטרטגית\n`;
+    content += `## פסג"ה ${user?.city || ''}\n`;
+    content += `### מוגש על ידי: ${user?.fullName || ''} | מחוז ${user?.district || ''}\n\n`;
+    content += `---\n\n`;
+    
+    // Slide 2: Data Overview
+    content += `# מיפוי נתונים\n`;
+    content += `## סך הכל ${stats.totalTrainings} השתלמויות\n`;
+    content += `- ${stats.totalParticipants} משתתפים\n`;
+    content += `- ${stats.totalHours} שעות הדרכה\n`;
+    content += `- ממוצע ${stats.avgParticipants} משתתפים להשתלמות\n\n`;
+    content += `---\n\n`;
+    
+    // Slide 3: Key Insight
+    if (analysis?.keyInsight) {
+      content += `# התובנה המרכזית\n`;
+      content += `${analysis.keyInsight}\n\n`;
+      content += `---\n\n`;
+    }
+    
+    // Slide 4: SWOT Analysis
+    if (analysis) {
+      content += `# ניתוח אסטרטגי\n`;
+      content += `## חוזקות\n`;
+      analysis.strengths?.forEach(s => content += `- ${s}\n`);
+      content += `\n## הזדמנויות\n`;
+      analysis.opportunities?.forEach(o => content += `- ${o}\n`);
+      content += `\n## אתגרים\n`;
+      analysis.weaknesses?.forEach(w => content += `- ${w}\n`);
+      content += `\n## איומים\n`;
+      analysis.threats?.forEach(t => content += `- ${t}\n`);
+      content += `\n---\n\n`;
+    }
+    
+    // Slide 5: My Belief
+    if (user?.visionPlan?.myBelief) {
+      content += `# "אני מאמין שלי"\n`;
+      content += `> ${user.visionPlan.myBelief}\n\n`;
+      content += `---\n\n`;
+    }
+    
+    // Slide 6: Flagship Action
+    if (user?.visionPlan?.flagshipAction) {
+      content += `# פעולת הדגל\n`;
+      content += `${user.visionPlan.flagshipAction}\n\n`;
+      content += `---\n\n`;
+    }
+    
+    // Slide 7: Vision
+    if (user?.visionPlan?.unlimitedBudgetVision) {
+      content += `# חזון ללא מגבלות\n`;
+      content += `${user.visionPlan.unlimitedBudgetVision}\n\n`;
+      content += `---\n\n`;
+    }
+    
+    // Slide 8: Pedagogical Pulse
+    const overallScore = Math.round((pulseMetrics.innovation + pulseMetrics.fieldConnection + pulseMetrics.organizationalResilience + pulseMetrics.leadership + pulseMetrics.initiative) / 5);
+    content += `# מדד הדופק הפדגוגי\n`;
+    content += `## ציון כולל: ${overallScore}/100\n\n`;
+    content += `| מדד | ציון |\n`;
+    content += `|-----|------|\n`;
+    content += `| חדשנות | ${pulseMetrics.innovation}/100 |\n`;
+    content += `| חיבור לשטח | ${pulseMetrics.fieldConnection}/100 |\n`;
+    content += `| חוסן ארגוני | ${pulseMetrics.organizationalResilience}/100 |\n`;
+    content += `| מנהיגות | ${pulseMetrics.leadership}/100 |\n`;
+    content += `| יוזמה | ${pulseMetrics.initiative}/100 |\n\n`;
+    content += `---\n\n`;
+    
+    // Slide 9: Core Goals
+    if (user?.visionPlan?.measurableGoals?.length) {
+      content += `# יעדי ליבה\n`;
+      content += `| # | יעד | מדד להצלחה |\n`;
+      content += `|---|-----|------------|\n`;
+      user.visionPlan.measurableGoals.forEach((goal, idx) => {
+        const metric = user?.visionPlan?.successMetrics?.[idx] || '—';
+        content += `| ${idx + 1} | ${goal} | ${metric} |\n`;
+      });
+      content += `\n---\n\n`;
+    }
+    
+    // Slide 10: Action Steps
+    if (user?.visionPlan?.actionSteps?.length) {
+      content += `# תוכנית פעולה\n`;
+      user.visionPlan.actionSteps.forEach((step, idx) => {
+        content += `${idx + 1}. ${step}\n`;
+      });
+      content += `\n---\n\n`;
+    }
+    
+    // Slide 11: Recommendations
+    if (analysis?.recommendations?.length) {
+      content += `# המלצות לצמיחה\n`;
+      analysis.recommendations.forEach((rec, idx) => {
+        content += `${idx + 1}. ${rec}\n`;
+      });
+      content += `\n---\n\n`;
+    }
+    
+    // Slide 12: Mentor Letter Summary
+    if (letter) {
+      content += `# מכתב מנטור אישי\n`;
+      content += letter.replace(/\*\*/g, '').substring(0, 500) + '...\n\n';
+      content += `---\n\n`;
+    }
+    
+    // Final slide
+    content += `# תודה רבה!\n`;
+    content += `## ${user?.fullName || ''}\n`;
+    content += `### פסג"ה ${user?.city || ''} | מחוז ${user?.district || ''}\n`;
+    
+    return content;
+  };
+
   const handlePrint = () => {
     window.print();
   };
 
   const handleExportNotebookLM = () => {
-    const content = generateTextContent();
+    const content = generatePresentationContent();
     const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `מסע-מנהיגות-${user?.fullName?.replace(/\s/g, '-') || 'דוח'}-notebooklm.txt`;
+    a.download = `מצגת-תוכנית-אסטרטגית-${user?.fullName?.replace(/\s/g, '-') || 'פסגה'}.txt`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    toast.success('הקובץ הורד! העלה אותו ל-NotebookLM ליצירת מצגת');
+    toast.success('הקובץ הורד! העלה אותו ל-NotebookLM ובקש ליצור מצגת מהתוכן');
   };
 
   const handleDownloadLetter = () => {
