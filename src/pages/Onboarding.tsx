@@ -36,7 +36,7 @@ const Onboarding: React.FC = () => {
   const [formData, setFormData] = useState({
     fullName: user?.fullName || '',
     gender: user?.gender || '',
-    district: user?.district || 'דרום',
+    district: user?.district || '',
     city: user?.city || '',
     pisgaSymbol: user?.pisgaSymbol || '',
     numKindergartens: user?.numKindergartens || 0,

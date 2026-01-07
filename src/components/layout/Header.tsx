@@ -30,20 +30,24 @@ const Header: React.FC = () => {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
-        {/* Logo Section */}
-        <Link to="/" className="flex items-center gap-3">
-          <motion.div 
-            className="flex items-center gap-2"
-            whileHover={{ scale: 1.02 }}
-          >
-            <div className="relative h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-glow">
-              <span className="text-xl font-bold text-primary-foreground">פ</span>
-            </div>
-            <div className="hidden sm:block">
-              <h1 className="text-lg font-bold gradient-text">פסג"ה פורצת דרך</h1>
-            </div>
-          </motion.div>
-        </Link>
+        {/* Ministry of Education Logo - Right Side */}
+        <div className="flex items-center gap-3">
+          <img 
+            src={ministryLogo} 
+            alt="משרד החינוך" 
+            className="h-12 w-auto"
+          />
+          <Link to="/" className="flex items-center gap-2">
+            <motion.div 
+              className="flex items-center gap-2"
+              whileHover={{ scale: 1.02 }}
+            >
+              <div className="hidden sm:block">
+                <h1 className="text-lg font-bold gradient-text">פסג"ה פורצת דרך</h1>
+              </div>
+            </motion.div>
+          </Link>
+        </div>
 
         {/* Navigation */}
         <nav className="hidden lg:flex items-center gap-1">
@@ -68,7 +72,7 @@ const Header: React.FC = () => {
           })}
         </nav>
 
-        {/* User Section */}
+        {/* User Section - Left Side */}
         <div className="flex items-center gap-3">
           {user?.fullName && (
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary">
@@ -76,12 +80,6 @@ const Header: React.FC = () => {
               <span className="text-sm font-medium">{user.fullName}</span>
             </div>
           )}
-          {/* Ministry of Education Logo */}
-          <img 
-            src={ministryLogo} 
-            alt="משרד החינוך" 
-            className="h-12 w-auto"
-          />
         </div>
       </div>
     </header>

@@ -16,7 +16,7 @@ const defaultUser: User = {
   id: '1',
   fullName: '',
   gender: '',
-  district: 'דרום',
+  district: '',
   city: '',
   pisgaSymbol: '',
   numKindergartens: 0,
