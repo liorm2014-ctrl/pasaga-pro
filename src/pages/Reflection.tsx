@@ -197,8 +197,12 @@ const Reflection: React.FC = () => {
                       style={{ fontSize: '16px', lineHeight: '1.8' }}
                       dangerouslySetInnerHTML={{ 
                         __html: message.content
+                          .replace(/###\s*/g, '')
+                          .replace(/##\s*/g, '')
+                          .replace(/#\s*/g, '')
                           .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
                           .replace(/\*/g, '')
+                          .replace(/<strong>/g, '<strong style="font-weight: bold;">')
                       }}
                     />
                     <span className="text-xs opacity-60 mt-2 block text-right">
@@ -226,8 +230,12 @@ const Reflection: React.FC = () => {
                     style={{ fontSize: '16px', lineHeight: '1.8' }}
                     dangerouslySetInnerHTML={{ 
                       __html: streamingContent
+                        .replace(/###\s*/g, '')
+                        .replace(/##\s*/g, '')
+                        .replace(/#\s*/g, '')
                         .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
                         .replace(/\*/g, '')
+                        .replace(/<strong>/g, '<strong style="font-weight: bold;">')
                     }}
                   />
                 </div>
