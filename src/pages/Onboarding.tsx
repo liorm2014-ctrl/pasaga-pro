@@ -425,7 +425,7 @@ const Onboarding: React.FC = () => {
                 type="submit" 
                 size="lg"
                 disabled={isSubmitting}
-                className="gap-2 bg-sky-400 hover:bg-sky-500 text-white border-2 border-sky-600 shadow-md font-semibold"
+                className="gap-2 bg-[#1e3a5f] hover:bg-[#2a4a73] text-white border-0 rounded-full px-8 shadow-md font-medium"
               >
                 {isSubmitting ? 'שומר...' : 'שמור והמשך'}
                 <ArrowLeft className="h-4 w-4" />

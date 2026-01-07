@@ -3,17 +3,20 @@ import { useApp } from '@/context/AppContext';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Check, ArrowLeft, Circle } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const steps = [
-  { key: 'onboardingCompleted', label: 'קליטת נתונים' },
-  { key: 'dashboardVisited', label: 'דשבורד פדגוגי' },
-  { key: 'reflectionCompleted', label: 'שיחה רפלקטיבית' },
-  { key: 'visionCompleted', label: 'חזון וקפיצה' },
-  { key: 'outputGenerated', label: 'תוצרים' },
+  { key: 'onboardingCompleted', label: 'קליטת נתונים', path: '/onboarding' },
+  { key: 'dashboardVisited', label: 'דשבורד פדגוגי', path: '/dashboard' },
+  { key: 'reflectionCompleted', label: 'שיחה רפלקטיבית', path: '/reflection' },
+  { key: 'visionCompleted', label: 'חזון וקפיצה', path: '/vision' },
+  { key: 'outputGenerated', label: 'תוצרים', path: '/output' },
 ];
 
 const ProgressPanel: React.FC = () => {
   const { user } = useApp();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   if (!user?.fullName) return null;
 
@@ -27,6 +30,21 @@ const ProgressPanel: React.FC = () => {
     if (user[prevKey]) return 'in-progress';
     
     return 'not-started';
+  };
+
+  const canNavigate = (index: number): boolean => {
+    // Can always go to onboarding
+    if (index === 0) return true;
+    
+    // Can navigate if previous step is completed
+    const prevKey = steps[index - 1].key as keyof typeof user;
+    return !!user[prevKey];
+  };
+
+  const handleStepClick = (step: typeof steps[0], index: number) => {
+    if (canNavigate(index)) {
+      navigate(step.path);
+    }
   };
 
   return (
@@ -44,15 +62,21 @@ const ProgressPanel: React.FC = () => {
         <div className="flex items-center gap-2">
           {steps.map((step, index) => {
             const status = getStepStatus(step.key, index);
+            const isClickable = canNavigate(index);
+            const isCurrentPath = location.pathname === step.path;
+            
             return (
               <div key={step.key} className="flex items-center gap-2">
                 <motion.div
-                  whileHover={{ scale: 1.05 }}
+                  whileHover={isClickable ? { scale: 1.05 } : undefined}
+                  onClick={() => handleStepClick(step, index)}
                   className={cn(
                     "flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-all",
                     status === 'completed' && "bg-success/10 text-success border border-success/30",
                     status === 'in-progress' && "bg-warning/10 text-warning border border-warning/30",
-                    status === 'not-started' && "bg-muted text-muted-foreground border border-border"
+                    status === 'not-started' && "bg-muted text-muted-foreground border border-border",
+                    isCurrentPath && "ring-2 ring-primary/50",
+                    isClickable ? "cursor-pointer hover:shadow-md" : "cursor-not-allowed opacity-60"
                   )}
                   title={step.label}
                 >
