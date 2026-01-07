@@ -15,15 +15,10 @@ import {
 } from 'lucide-react';
 import { ConversationMessage } from '@/types';
 import { cn } from '@/lib/utils';
+import { useAIChat } from '@/hooks/useAIChat';
+import { toast } from 'sonner';
 
-const reflectionQuestions = [
-  'שלום! אני כאן כדי ללוות אותך במסע רפלקטיבי על ההשתלמויות והמנהיגות הפדגוגית שלך. בואו נתחיל - ספר/י לי על פעולות גדולות שנעשו בפסג"ה ומה היו האדוות של הפעולות האלה?',
-  'תודה על השיתוף! מה היעדים שהיית רוצה להשיג בשנה הקרובה?',
-  'מעניין מאוד. האם היעדים האלה עומדים במסגרת התקציב הקיים?',
-  'הבנתי. איפה נמצא הקושי העיקרי לדעתך בהשגת היעדים?',
-  'מהו המפתח לפתרון הבעיה? ומה ביכולתך לעשות כדי להתקדם?',
-  'נהדר! בוא/י נחשוב על פתרון יצירתי להתמודדות עם הקושי שציינת.',
-];
+const initialPrompt = 'שלום! אני כאן כדי ללוות אותך במסע רפלקטיבי על ההשתלמויות והמנהיגות הפדגוגית שלך. בואו נתחיל - ספר/י לי על פעולות גדולות שנעשו בפסג"ה ומה היו האדוות של הפעולות האלה?';
 
 const Reflection: React.FC = () => {
   const { user, updateUser, trainings } = useApp();
@@ -35,7 +30,19 @@ const Reflection: React.FC = () => {
   );
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [streamingContent, setStreamingContent] = useState('');
+
+  const { streamChat, isLoading, error } = useAIChat({
+    userContext: {
+      fullName: user?.fullName,
+      district: user?.district,
+      city: user?.city,
+      numKindergartens: user?.numKindergartens,
+      numElementary: user?.numElementary,
+      numHighSchools: user?.numHighSchools,
+      trainingsCount: trainings.length,
+    },
+  });
 
   useEffect(() => {
     if (!user?.dashboardVisited) {
@@ -47,34 +54,29 @@ const Reflection: React.FC = () => {
     if (messages.length === 0) {
       const initialMessage: ConversationMessage = {
         role: 'assistant',
-        content: reflectionQuestions[0],
+        content: initialPrompt,
         timestamp: new Date().toISOString(),
       };
       setMessages([initialMessage]);
-      setCurrentQuestionIndex(1);
     }
   }, [user, navigate, messages.length]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  }, [messages, streamingContent]);
 
   useEffect(() => {
     updateUser({ reflectionConversation: messages });
   }, [messages, updateUser]);
 
-  const generateAIResponse = (userMessage: string): string => {
-    // In real app, this would call the AI API
-    const responses = [
-      `תודה על השיתוף המשמעותי! אני רואה שיש לך חשיבה מעמיקה על התהליכים בפסג"ה. ${reflectionQuestions[currentQuestionIndex] || 'נראה שסיימנו את השאלות העיקריות. האם יש משהו נוסף שתרצה/י להוסיף?'}`,
-      `הבנתי את הנקודה שלך לגבי "${userMessage.slice(0, 30)}...". זה מחזק את התובנות שעלו מהנתונים. ${reflectionQuestions[currentQuestionIndex] || 'בוא/י נסכם את מה שעלה בשיחה.'}`,
-      `נקודה חשובה! זה מתקשר למה שראינו בניתוח הנתונים. ${reflectionQuestions[currentQuestionIndex] || 'האם תרצה/י להמשיך לשלב החזון?'}`,
-    ];
-    return responses[Math.floor(Math.random() * responses.length)];
-  };
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+    }
+  }, [error]);
 
   const handleSend = async () => {
-    if (!inputValue.trim()) return;
+    if (!inputValue.trim() || isTyping) return;
 
     const userMessage: ConversationMessage = {
       role: 'user',
@@ -82,26 +84,47 @@ const Reflection: React.FC = () => {
       timestamp: new Date().toISOString(),
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    const newMessages = [...messages, userMessage];
+    setMessages(newMessages);
     setInputValue('');
     setIsTyping(true);
+    setStreamingContent('');
 
-    // Simulate AI response delay
-    setTimeout(() => {
-      const aiResponse: ConversationMessage = {
-        role: 'assistant',
-        content: generateAIResponse(inputValue),
-        timestamp: new Date().toISOString(),
-      };
-      setMessages(prev => [...prev, aiResponse]);
-      setCurrentQuestionIndex(prev => Math.min(prev + 1, reflectionQuestions.length));
+    try {
+      // Convert to API format
+      const apiMessages = newMessages.map(m => ({
+        role: m.role,
+        content: m.content,
+      }));
+
+      let fullResponse = '';
+
+      await streamChat({
+        messages: apiMessages,
+        onDelta: (chunk) => {
+          fullResponse += chunk;
+          setStreamingContent(fullResponse);
+        },
+        onDone: () => {
+          const aiMessage: ConversationMessage = {
+            role: 'assistant',
+            content: fullResponse,
+            timestamp: new Date().toISOString(),
+          };
+          setMessages(prev => [...prev, aiMessage]);
+          setStreamingContent('');
+          setIsTyping(false);
+
+          // Mark as completed after enough messages
+          if (newMessages.length >= 8) {
+            updateUser({ reflectionCompleted: true });
+          }
+        },
+      });
+    } catch (err) {
       setIsTyping(false);
-
-      // Mark as completed after enough messages
-      if (messages.length >= 8) {
-        updateUser({ reflectionCompleted: true });
-      }
-    }, 1500);
+      setStreamingContent('');
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -131,15 +154,10 @@ const Reflection: React.FC = () => {
               </div>
             </div>
             
-            <a 
-              href="https://gemini.google.com" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-accent/10 text-accent text-sm hover:bg-accent/20 transition-colors"
-            >
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-accent/10 text-accent text-sm">
               <Sparkles className="h-4 w-4" />
-              Gemini
-            </a>
+              AI מנטור
+            </div>
           </div>
 
           {/* Messages */}
@@ -171,7 +189,7 @@ const Reflection: React.FC = () => {
                       ? "bg-accent text-accent-foreground rounded-br-sm" 
                       : "bg-muted text-foreground rounded-bl-sm"
                   )}>
-                    <p className="leading-relaxed">{message.content}</p>
+                    <p className="leading-relaxed whitespace-pre-wrap">{message.content}</p>
                     <span className="text-xs opacity-60 mt-2 block">
                       {new Date(message.timestamp).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })}
                     </span>
@@ -180,7 +198,24 @@ const Reflection: React.FC = () => {
               ))}
             </AnimatePresence>
 
-            {isTyping && (
+            {/* Streaming response */}
+            {isTyping && streamingContent && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="flex gap-3"
+              >
+                <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
+                  <Bot className="h-5 w-5" />
+                </div>
+                <div className="max-w-[80%] p-4 rounded-2xl bg-muted text-foreground rounded-bl-sm">
+                  <p className="leading-relaxed whitespace-pre-wrap">{streamingContent}</p>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Typing indicator */}
+            {isTyping && !streamingContent && (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -234,7 +269,7 @@ const Reflection: React.FC = () => {
             <Button 
               size="lg" 
               onClick={() => navigate('/vision')}
-              className="gap-2"
+              className="gap-2 bg-sky-200 hover:bg-sky-300 text-black border border-sky-400"
             >
               המשך לחזון וקפיצה
               <ArrowLeft className="h-4 w-4" />
