@@ -531,8 +531,8 @@ const Output: React.FC = () => {
                   key={section.key}
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className={cn("p-4 rounded-xl border", section.color)}
-                  style={{ backgroundColor: 'rgba(var(--background), 0.5)' }}
+                  className={cn("p-4 rounded-xl border backdrop-blur-md", section.color)}
+                  style={{ backgroundColor: 'rgba(255, 255, 255, 0.6)' }}
                 >
                   <div className="flex items-center gap-2 mb-3" style={{ textAlign: 'right' }}>
                     <Icon className="h-5 w-5" />
