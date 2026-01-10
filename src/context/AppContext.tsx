@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { User, Training } from '@/types';
 
 interface AppContextType {
@@ -50,9 +50,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     localStorage.setItem('pisgaTrainings', JSON.stringify(trainings));
   }, [trainings]);
 
-  const updateUser = (updates: Partial<User>) => {
+  const updateUser = useCallback((updates: Partial<User>) => {
     setUser((prev) => (prev ? { ...prev, ...updates } : null));
-  };
+  }, []);
 
   const addTrainings = (newTrainings: Training[]) => {
     setTrainings((prev) => [...prev, ...newTrainings]);

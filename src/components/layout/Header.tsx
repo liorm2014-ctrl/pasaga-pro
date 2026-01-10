@@ -10,7 +10,8 @@ import {
   MessageCircle, 
   Rocket, 
   Download,
-  User
+  User,
+  Shield
 } from 'lucide-react';
 import ministryLogo from '@/assets/ministry-logo.png';
 
@@ -80,6 +81,20 @@ const Header: React.FC = () => {
               <span className="text-sm font-medium">{user.fullName}</span>
             </div>
           )}
+          
+          {/* Admin Button */}
+          <Link
+            to="/admin"
+            className={cn(
+              "flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all",
+              location.pathname === '/admin'
+                ? "bg-primary text-primary-foreground"
+                : "bg-accent/10 text-accent hover:bg-accent/20"
+            )}
+          >
+            <Shield className="h-4 w-4" />
+            <span className="hidden sm:inline">ניהול</span>
+          </Link>
         </div>
       </div>
     </header>
