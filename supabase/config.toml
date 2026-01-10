@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.mentor-letter]
 verify_jwt = false
+
+[functions.receive-chat-protocol]
+verify_jwt = false
