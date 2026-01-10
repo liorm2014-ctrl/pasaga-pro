@@ -67,8 +67,14 @@ const Reflection: React.FC = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, streamingContent]);
 
+  // Save conversation only when messages actually change (not on every render)
+  const messagesRef = React.useRef<string>('');
   useEffect(() => {
-    updateUser({ reflectionConversation: messages });
+    const messagesJson = JSON.stringify(messages);
+    if (messagesJson !== messagesRef.current && messages.length > 0) {
+      messagesRef.current = messagesJson;
+      updateUser({ reflectionConversation: messages });
+    }
   }, [messages, updateUser]);
 
   useEffect(() => {

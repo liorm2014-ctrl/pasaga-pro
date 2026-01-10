@@ -110,7 +110,7 @@ const JourneySteps: React.FC = () => {
                   className={cn(
                     "relative h-full p-5 rounded-2xl border transition-all cursor-pointer bg-white",
                     status === 'completed' && "border-success/30 shadow-md",
-                    status === 'in-progress' && "border-warning/30 shadow-lg animate-pulse-glow",
+                    status === 'in-progress' && "border-warning/30 shadow-lg",
                     status === 'not-started' && "border-primary/30 shadow-card hover:shadow-lg"
                   )}
                 >
