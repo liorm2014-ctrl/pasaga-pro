@@ -11,6 +11,7 @@ import Reflection from "./pages/Reflection";
 import Vision from "./pages/Vision";
 import Output from "./pages/Output";
 import Admin from "./pages/Admin";
+import ChatLogs from "./pages/ChatLogs";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +31,7 @@ const App = () => (
             <Route path="/vision" element={<Vision />} />
             <Route path="/output" element={<Output />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/chat-logs" element={<ChatLogs />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
