@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useCallback } from 'react';
+import React, { useEffect, useMemo, useCallback, useState } from 'react';
 import Layout from '@/components/layout/Layout';
 import { motion } from 'framer-motion';
 import { useApp } from '@/context/AppContext';
@@ -33,6 +33,9 @@ import {
 } from 'recharts';
 import { useDashboardAnalysis } from '@/hooks/useDashboardAnalysis';
 import AIAnalysisSection from '@/components/dashboard/AIAnalysisSection';
+import { useWorkflowValidation } from '@/hooks/useWorkflowValidation';
+import ImbalanceWarning from '@/components/workflow/ImbalanceWarning';
+import BlockingDialog from '@/components/workflow/BlockingDialog';
 
 const COLORS = ['#3B82F6', '#F59E0B', '#10B981', '#EF4444', '#8B5CF6', '#EC4899', '#14B8A6', '#F97316', '#6366F1', '#84CC16', '#06B6D4'];
 
@@ -40,6 +43,9 @@ const Dashboard: React.FC = () => {
   const { user, trainings, updateUser } = useApp();
   const navigate = useNavigate();
   const { analysis, isLoading: analysisLoading, error: analysisError, fetchAnalysis } = useDashboardAnalysis();
+  const { imbalanceDetection, validateStep, hasInstitutions, hasTrainings } = useWorkflowValidation();
+  const [showBlockingDialog, setShowBlockingDialog] = useState(false);
+  const [blockingInfo, setBlockingInfo] = useState<{ title: string; reason: string; action: string } | null>(null);
 
   useEffect(() => {
     if (!user?.onboardingCompleted) {
@@ -50,6 +56,21 @@ const Dashboard: React.FC = () => {
       updateUser({ dashboardVisited: true });
     }
   }, [user, navigate, updateUser]);
+
+  // Check workflow validation
+  useEffect(() => {
+    if (!hasInstitutions || !hasTrainings) {
+      const validation = validateStep(2);
+      if (!validation.isValid) {
+        setBlockingInfo({
+          title: validation.blockedTitle || 'חסרים נתונים',
+          reason: validation.blockedReason || 'נדרשים נתונים נוספים',
+          action: validation.requiredAction || 'השלם את קליטת הנתונים',
+        });
+        setShowBlockingDialog(true);
+      }
+    }
+  }, [hasInstitutions, hasTrainings, validateStep]);
 
   const stats = useMemo(() => {
     const totalTrainings = trainings.length;
@@ -293,6 +314,14 @@ const Dashboard: React.FC = () => {
             </div>
           </div>
         </motion.div>
+
+        {/* Imbalance Warning - if detected */}
+        {imbalanceDetection?.isDistortion && (
+          <ImbalanceWarning
+            domain={imbalanceDetection.domain}
+            percentage={imbalanceDetection.percentage}
+          />
+        )}
 
         {/* Stats Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -574,6 +603,16 @@ const Dashboard: React.FC = () => {
             <ArrowLeft className="h-4 w-4" />
           </Button>
         </div>
+
+        {/* Blocking Dialog */}
+        <BlockingDialog
+          open={showBlockingDialog}
+          onOpenChange={setShowBlockingDialog}
+          title={blockingInfo?.title || ''}
+          reason={blockingInfo?.reason || ''}
+          requiredAction={blockingInfo?.action || ''}
+          navigateTo="/onboarding"
+        />
       </motion.div>
     </Layout>
   );
