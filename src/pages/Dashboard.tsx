@@ -53,7 +53,7 @@ const Dashboard: React.FC = () => {
       return;
     }
     if (!user.dashboardVisited) {
-      updateUser({ dashboardVisited: true });
+      void updateUser({ dashboardVisited: true });
     }
   }, [user, navigate, updateUser]);
 
@@ -209,7 +209,7 @@ const Dashboard: React.FC = () => {
   // Save SWOT analysis to user when AI analysis completes
   useEffect(() => {
     if (analysis && !user?.swotAnalysis) {
-      updateUser({
+      void updateUser({
         swotAnalysis: {
           strengths: analysis.strengths || [],
           weaknesses: analysis.weaknesses || [],
@@ -516,7 +516,7 @@ const Dashboard: React.FC = () => {
           </div>
           <Textarea
             value={user?.segmentationInsight || ''}
-            onChange={(e) => updateUser({ segmentationInsight: e.target.value })}
+            onChange={(e) => void updateUser({ segmentationInsight: e.target.value })}
             placeholder="מהי התובנה המרכזית שעולה מהנתונים והפילוחים שהוצגו? מה הדבר הכי משמעותי שלמדת מהניתוח?"
             className="min-h-[120px] text-base leading-relaxed resize-none"
           />
@@ -534,8 +534,8 @@ const Dashboard: React.FC = () => {
         <div className="flex justify-end">
           <Button 
             size="lg" 
-            onClick={() => {
-              updateUser({ dashboardVisited: true });
+            onClick={async () => {
+              await updateUser({ dashboardVisited: true });
               navigate('/reflection');
             }}
             className="gap-2 text-white border-0"

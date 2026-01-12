@@ -106,7 +106,7 @@ const Output: React.FC = () => {
   // Save SWOT analysis to user when AI analysis completes
   useEffect(() => {
     if (analysis && !user?.swotAnalysis) {
-      updateUser({
+      void updateUser({
         swotAnalysis: {
           strengths: analysis.strengths || [],
           weaknesses: analysis.weaknesses || [],
