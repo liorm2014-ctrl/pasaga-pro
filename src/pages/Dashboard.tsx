@@ -6,10 +6,6 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { 
-  BarChart3, 
-  Users, 
-  Clock, 
-  BookOpen,
   Download,
   ArrowLeft,
   MapPin,
@@ -18,27 +14,17 @@ import {
   School,
   Lightbulb,
   Loader2,
+  FileSpreadsheet,
 } from 'lucide-react';
-import {
-  PieChart,
-  Pie,
-  Cell,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from 'recharts';
 import { useDashboardAnalysis } from '@/hooks/useDashboardAnalysis';
 import AIAnalysisSection from '@/components/dashboard/AIAnalysisSection';
+import KPICards from '@/components/dashboard/KPICards';
+import TrainingsTable from '@/components/dashboard/TrainingsTable';
+import InsightsSection from '@/components/dashboard/InsightsSection';
+import DistributionCharts from '@/components/dashboard/DistributionCharts';
 import { useWorkflowValidation } from '@/hooks/useWorkflowValidation';
 import ImbalanceWarning from '@/components/workflow/ImbalanceWarning';
 import BlockingDialog from '@/components/workflow/BlockingDialog';
-
-const COLORS = ['#3B82F6', '#F59E0B', '#10B981', '#EF4444', '#8B5CF6', '#EC4899', '#14B8A6', '#F97316', '#6366F1', '#84CC16', '#06B6D4'];
 
 const Dashboard: React.FC = () => {
   const { user, trainings, updateUser, isLoading, isSaving } = useApp();
@@ -73,6 +59,7 @@ const Dashboard: React.FC = () => {
     }
   }, [hasInstitutions, hasTrainings, validateStep]);
 
+  // Stats for AI analysis
   const stats = useMemo(() => {
     const totalTrainings = trainings.length;
     const totalParticipants = trainings.reduce((sum, t) => sum + t.participants, 0);
@@ -82,35 +69,7 @@ const Dashboard: React.FC = () => {
     return { totalTrainings, totalParticipants, totalHours, avgParticipants };
   }, [trainings]);
 
-  // Institution participation percentages
-  const institutionData = useMemo(() => {
-    const total = (user?.numKindergartens || 0) + (user?.numElementary || 0) + (user?.numHighSchools || 0);
-    if (total === 0) return [];
-    
-    return [
-      { name: 'גנים', value: user?.numKindergartens || 0, percentage: Math.round(((user?.numKindergartens || 0) / total) * 100) },
-      { name: 'יסודי', value: user?.numElementary || 0, percentage: Math.round(((user?.numElementary || 0) / total) * 100) },
-      { name: 'תיכון', value: user?.numHighSchools || 0, percentage: Math.round(((user?.numHighSchools || 0) / total) * 100) },
-    ];
-  }, [user]);
-
-
-  // Learning method distribution
-  const learningMethodData = useMemo(() => {
-    const grouped = trainings.reduce((acc, t) => {
-      acc[t.learningMethod] = (acc[t.learningMethod] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
-
-    const total = Object.values(grouped).reduce((a, b) => a + b, 0);
-    return Object.entries(grouped).map(([name, value]) => ({
-      name,
-      value,
-      percentage: total > 0 ? Math.round((value / total) * 100) : 0,
-    }));
-  }, [trainings]);
-
-
+  // Category data for AI
   const categoryData = useMemo(() => {
     const grouped = trainings.reduce((acc, t) => {
       acc[t.category] = (acc[t.category] || 0) + 1;
@@ -126,6 +85,7 @@ const Dashboard: React.FC = () => {
     }));
   }, [trainings]);
 
+  // Audience data for AI
   const audienceData = useMemo(() => {
     const grouped = trainings.reduce((acc, t) => {
       acc[t.targetAudience] = (acc[t.targetAudience] || 0) + 1;
@@ -140,6 +100,7 @@ const Dashboard: React.FC = () => {
     }));
   }, [trainings]);
 
+  // Monthly data for AI
   const monthlyData = useMemo(() => {
     const months = ['ינו', 'פבר', 'מרץ', 'אפר', 'מאי', 'יונ'];
     return months.map((month, index) => {
@@ -154,28 +115,6 @@ const Dashboard: React.FC = () => {
       };
     });
   }, [trainings]);
-
-  // Custom label with external lines
-  const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, name, percentage }: any) => {
-    const RADIAN = Math.PI / 180;
-    const radius = outerRadius * 1.4;
-    const x = cx + radius * Math.cos(-midAngle * RADIAN);
-    const y = cy + radius * Math.sin(-midAngle * RADIAN);
-    
-    return (
-      <text
-        x={x}
-        y={y}
-        fill="hsl(var(--foreground))"
-        textAnchor={x > cx ? 'start' : 'end'}
-        dominantBaseline="central"
-        fontSize={12}
-        fontWeight={500}
-      >
-        {`${name} ${percentage || Math.round(percent * 100)}%`}
-      </text>
-    );
-  };
 
   const handleFetchAnalysis = useCallback(() => {
     const pisgahData = {
@@ -245,13 +184,19 @@ const Dashboard: React.FC = () => {
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">ניתוח פדגוגי</h1>
-            <p className="text-muted-foreground">סקירה מקיפה של נתוני ההשתלמויות בפסג"ה</p>
+            <h1 className="text-2xl font-bold text-foreground">לוח בקרה ניהולי</h1>
+            <p className="text-muted-foreground">סקירה מקיפה של תכניות ההשתלמות בפסג"ה</p>
           </div>
-          <Button variant="outline" className="gap-2">
-            <Download className="h-4 w-4" />
-            ייצוא ל-Docs
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" className="gap-2">
+              <FileSpreadsheet className="h-4 w-4" />
+              ייצוא Excel
+            </Button>
+            <Button variant="outline" className="gap-2">
+              <Download className="h-4 w-4" />
+              ייצוא ל-Docs
+            </Button>
+          </div>
         </div>
 
         {/* Pisgah Info Card */}
@@ -283,10 +228,12 @@ const Dashboard: React.FC = () => {
               </div>
             </div>
             <div className="flex items-center gap-3 p-3 bg-background/50 rounded-lg border border-border/50">
-              <BookOpen className="h-5 w-5 text-success" />
+              <School className="h-5 w-5 text-success" />
               <div>
-                <p className="text-xs text-muted-foreground">סמל מוסד</p>
-                <p className="font-medium text-foreground">{user?.pisgaSymbol || 'לא הוזן'}</p>
+                <p className="text-xs text-muted-foreground">מוסדות חינוך</p>
+                <p className="font-medium text-foreground">
+                  {(user?.numKindergartens || 0) + (user?.numElementary || 0) + (user?.numHighSchools || 0)} מוסדות
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-3 p-3 bg-background/50 rounded-lg border border-border/50">
@@ -307,219 +254,22 @@ const Dashboard: React.FC = () => {
           />
         )}
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[
-            { label: 'סך השתלמויות', value: stats.totalTrainings, icon: BookOpen, color: 'text-primary' },
-            { label: 'סך משתתפים', value: stats.totalParticipants.toLocaleString(), icon: Users, color: 'text-accent' },
-            { label: 'שעות הדרכה', value: stats.totalHours, icon: Clock, color: 'text-success' },
-            { label: 'ממוצע משתתפים', value: stats.avgParticipants, icon: BarChart3, color: 'text-warning' },
-          ].map((stat, index) => (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-              className="card-elevated"
-            >
-              <div className={`w-10 h-10 rounded-xl bg-muted flex items-center justify-center mb-3 ${stat.color}`}>
-                <stat.icon className="h-5 w-5" />
-              </div>
-              <p className="text-2xl font-bold text-foreground">{stat.value}</p>
-              <p className="text-sm text-muted-foreground">{stat.label}</p>
-            </motion.div>
-          ))}
-        </div>
+        {/* KPI Cards */}
+        <KPICards trainings={trainings} />
 
-        {/* Institution Distribution Pie Chart */}
-        {institutionData.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="card-elevated"
-          >
-            <h3 className="font-bold text-foreground mb-4">התפלגות מוסדות חינוך באחוזים</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={institutionData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={true}
-                  label={renderCustomizedLabel}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {institutionData.map((_, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(value, name) => [`${value} מוסדות`, name]} />
-              </PieChart>
-            </ResponsiveContainer>
-          </motion.div>
-        )}
+        {/* Distribution Charts */}
+        <DistributionCharts trainings={trainings} />
 
-        {/* Charts Grid - Row 1 */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Pie Chart - Learning Methods */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.3 }}
-            className="card-elevated"
-          >
-            <h3 className="font-bold text-foreground mb-4">אופני למידה</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={learningMethodData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={true}
-                  label={renderCustomizedLabel}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {learningMethodData.map((_, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(value, name) => [`${value} השתלמויות`, name]} />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
-          </motion.div>
+        {/* Trainings Table with Filters */}
+        <TrainingsTable trainings={trainings} />
 
-          {/* Pie Chart - Category Distribution */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.3 }}
-            className="card-elevated"
-          >
-            <h3 className="font-bold text-foreground mb-4">התפלגות לפי קטגוריה</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={categoryData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={true}
-                  label={renderCustomizedLabel}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {categoryData.map((_, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(value, name) => [`${value} השתלמויות`, name]} />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
-          </motion.div>
-        </div>
-
-        {/* Charts Grid - Row 2 */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Bar Chart - Audience */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.35 }}
-            className="card-elevated"
-          >
-            <h3 className="font-bold text-foreground mb-4">התפלגות לפי קהל יעד</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={audienceData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis dataKey="name" tick={{ fill: 'hsl(var(--foreground))' }} />
-                <YAxis tick={{ fill: 'hsl(var(--foreground))' }} />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: 'hsl(var(--card))',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '8px'
-                  }}
-                  formatter={(value, name) => [`${value} השתלמויות`, 'כמות']}
-                />
-                <Bar dataKey="count" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} label={{ position: 'top', fill: 'hsl(var(--foreground))', fontSize: 12 }} />
-              </BarChart>
-            </ResponsiveContainer>
-          </motion.div>
-
-          {/* Pie Chart - Target Audience Distribution */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.35 }}
-            className="card-elevated"
-          >
-            <h3 className="font-bold text-foreground mb-4">התפלגות משתתפים לפי קהל יעד</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={audienceData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={true}
-                  label={renderCustomizedLabel}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="count"
-                >
-                  {audienceData.map((_, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(value, name) => [`${value} השתלמויות`, name]} />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
-          </motion.div>
-        </div>
-
-        {/* Verbal Analysis Section - Replaces Line Chart */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.45 }}
-          className="card-elevated"
-          dir="rtl"
-        >
-          <h3 className="font-bold text-foreground mb-4 text-lg">ניתוח מגמות והתפתחות</h3>
-          <div className="space-y-4 text-base leading-relaxed text-foreground text-right">
-            <p>
-              <strong>סיכום פעילות:</strong> במהלך התקופה הנסקרת נערכו {stats.totalTrainings} השתלמויות 
-              בהשתתפות {stats.totalParticipants.toLocaleString()} משתתפים, סה"כ {stats.totalHours} שעות הדרכה.
-              ממוצע המשתתפים להשתלמות עמד על {stats.avgParticipants} משתתפים.
-            </p>
-            <p>
-              <strong>קהלי יעד:</strong> ההשתלמויות חולקו בין מספר קהלי יעד, עם דגש על 
-              {audienceData.length > 0 && ` ${audienceData[0]?.name} (${audienceData[0]?.count} השתלמויות)`}
-              {audienceData.length > 1 && ` ו-${audienceData[1]?.name} (${audienceData[1]?.count} השתלמויות)`}.
-            </p>
-            <p>
-              <strong>אופני למידה:</strong> ההשתלמויות התקיימו במגוון אופני למידה כולל למידה פרונטלית, 
-              סינכרונית וא-סינכרונית, המאפשרים גמישות והנגשה למגוון צרכים.
-            </p>
-            <p>
-              <strong>מגמות:</strong> ניתן לזהות פיזור רחב של נושאי ההשתלמויות על פני תחומי תוכן מגוונים,
-              עם דגש על פיתוח מקצועי רב-תחומי המותאם לצרכי השדה החינוכי.
-            </p>
-          </div>
-        </motion.div>
+        {/* Insights Section */}
+        <InsightsSection trainings={trainings} />
 
         {/* User Insight Question */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
           className="card-elevated"
           dir="rtl"
         >
