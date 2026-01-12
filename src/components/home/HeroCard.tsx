@@ -62,8 +62,8 @@ const HeroCard: React.FC = () => {
             <>
               <Link to="/auth">
                 <Button size="lg" className="gap-2 text-lg px-8">
-                  <LogIn className="h-5 w-5" />
-                  התחל את המסע
+                  <Rocket className="h-5 w-5" />
+                  צאו לדרך
                   <ArrowLeft className="h-5 w-5" />
                 </Button>
               </Link>

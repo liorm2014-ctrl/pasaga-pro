@@ -245,13 +245,6 @@ const Onboarding: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      // Update user data
-      updateUser({
-        ...formData,
-        gender: formData.gender as 'male' | 'female' | '',
-        onboardingCompleted: true,
-      });
-
       // Parse trainings from uploaded Excel file
       const trainings = await parseExcelFile(uploadedFile);
       
@@ -261,7 +254,26 @@ const Onboarding: React.FC = () => {
         return;
       }
       
-      addTrainings(trainings);
+      // Save trainings to database
+      const trainingsSuccess = await addTrainings(trainings);
+      if (!trainingsSuccess) {
+        toast.error('אירעה שגיאה בשמירת ההשתלמויות');
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Update user data
+      const userSuccess = await updateUser({
+        ...formData,
+        gender: formData.gender as 'male' | 'female' | '',
+        onboardingCompleted: true,
+      });
+
+      if (!userSuccess) {
+        toast.error('אירעה שגיאה בשמירת הנתונים');
+        setIsSubmitting(false);
+        return;
+      }
 
       toast.success(`נטענו ${trainings.length} השתלמויות מהקובץ בהצלחה!`);
       navigate('/dashboard');

@@ -98,7 +98,7 @@ const Reflection: React.FC = () => {
     const messagesJson = JSON.stringify(messages);
     if (messagesJson !== messagesRef.current && messages.length > 0) {
       messagesRef.current = messagesJson;
-      updateUser({ reflectionConversation: messages });
+      void updateUser({ reflectionConversation: messages });
     }
   }, [messages, updateUser]);
 
@@ -150,7 +150,7 @@ const Reflection: React.FC = () => {
 
           // Mark as completed after enough messages
           if (newMessages.length >= 8) {
-            updateUser({ reflectionCompleted: true });
+            void updateUser({ reflectionCompleted: true });
           }
         },
       });
@@ -300,8 +300,8 @@ const Reflection: React.FC = () => {
         >
           <Button 
             size="lg" 
-            onClick={() => {
-              updateUser({ reflectionCompleted: true });
+            onClick={async () => {
+              await updateUser({ reflectionCompleted: true });
               toast.success('השיחה נשמרה בהצלחה');
               navigate('/vision');
             }}

@@ -21,9 +21,9 @@ const ResetJourneyButton: React.FC = () => {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
 
-  const handleReset = () => {
+  const handleReset = async () => {
     // Keep only the basic onboarding data
-    updateUser({
+    await updateUser({
       // Reset all journey data but keep personal info
       reflectionConversation: [],
       visionPlan: undefined,

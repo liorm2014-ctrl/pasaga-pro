@@ -38,8 +38,8 @@ const Vision: React.FC = () => {
     'מעבדת חווית למידה אינטראקטיבית',
   ];
 
-  const handleSave = () => {
-    updateUser({
+  const handleSave = async () => {
+    await updateUser({
       visionPlan,
       visionCompleted: true,
     });
