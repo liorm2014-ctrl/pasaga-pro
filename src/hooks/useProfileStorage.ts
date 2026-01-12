@@ -151,6 +151,13 @@ export const useProfileStorage = () => {
     return saveProfile(updatedUser);
   }, [user, saveProfile]);
 
+  // Clean string from problematic Unicode characters (null bytes, etc.)
+  const sanitizeString = (str: string | null | undefined): string | null => {
+    if (!str) return null;
+    // Remove null bytes and other control characters that PostgreSQL can't handle
+    return str.replace(/\u0000/g, '').replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '').trim();
+  };
+
   // Save trainings to database (replace all)
   const saveTrainings = useCallback(async (newTrainings: Training[]): Promise<boolean> => {
     if (!authUserId) return false;
@@ -173,20 +180,20 @@ export const useProfileStorage = () => {
         return true;
       }
 
-      // Insert new trainings
+      // Insert new trainings with sanitized strings
       const trainingsToInsert = newTrainings.map((t) => ({
         user_id: authUserId,
-        training_name: t.trainingName,
+        training_name: sanitizeString(t.trainingName) || 'ללא שם',
         date: t.date,
         participants: t.participants,
-        category: t.category,
-        target_audience: t.targetAudience,
-        reform: t.reform,
-        learning_method: t.learningMethod,
-        domain: t.domain,
+        category: sanitizeString(t.category) || 'אחר',
+        target_audience: sanitizeString(t.targetAudience) || 'יסודי',
+        reform: sanitizeString(t.reform) || 'אחר',
+        learning_method: sanitizeString(t.learningMethod) || 'פרונטלי',
+        domain: sanitizeString(t.domain) || 'אחר',
         duration_hours: t.durationHours,
-        facilitator: t.facilitator || null,
-        notes: t.notes || null,
+        facilitator: sanitizeString(t.facilitator),
+        notes: sanitizeString(t.notes),
       }));
 
       const { data, error: insertError } = await supabase
