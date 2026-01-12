@@ -1,8 +1,10 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useApp } from '@/context/AppContext';
+import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 import { 
   Home, 
   FileText, 
@@ -11,7 +13,9 @@ import {
   Rocket, 
   Download,
   User,
-  Shield
+  Shield,
+  LogOut,
+  LogIn
 } from 'lucide-react';
 import ministryLogo from '@/assets/ministry-logo.png';
 
@@ -26,7 +30,14 @@ const navItems = [
 
 const Header: React.FC = () => {
   const location = useLocation();
-  const { user } = useApp();
+  const navigate = useNavigate();
+  const { user: appUser } = useApp();
+  const { user: authUser, signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -75,26 +86,52 @@ const Header: React.FC = () => {
 
         {/* User Section - Left Side */}
         <div className="flex items-center gap-3">
-          {user?.fullName && (
+          {appUser?.fullName && (
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary">
               <User className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-medium">{user.fullName}</span>
+              <span className="text-sm font-medium">{appUser.fullName}</span>
             </div>
           )}
           
           {/* Admin Button */}
-          <Link
-            to="/admin"
-            className={cn(
-              "flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all",
-              location.pathname === '/admin'
-                ? "bg-primary text-primary-foreground"
-                : "bg-accent/10 text-accent hover:bg-accent/20"
-            )}
-          >
-            <Shield className="h-4 w-4" />
-            <span className="hidden sm:inline">ניהול</span>
-          </Link>
+          {authUser && (
+            <Link
+              to="/admin"
+              className={cn(
+                "flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all",
+                location.pathname === '/admin'
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-accent/10 text-accent hover:bg-accent/20"
+              )}
+            >
+              <Shield className="h-4 w-4" />
+              <span className="hidden sm:inline">ניהול</span>
+            </Link>
+          )}
+
+          {/* Auth Button */}
+          {authUser ? (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleSignOut}
+              className="gap-2 text-muted-foreground hover:text-foreground"
+            >
+              <LogOut className="h-4 w-4" />
+              <span className="hidden sm:inline">התנתק</span>
+            </Button>
+          ) : (
+            <Link to="/auth">
+              <Button
+                variant="default"
+                size="sm"
+                className="gap-2"
+              >
+                <LogIn className="h-4 w-4" />
+                <span>התחבר</span>
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
     </header>

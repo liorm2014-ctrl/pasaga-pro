@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { ConversationMessage } from '@/types';
+import { supabase } from '@/integrations/supabase/client';
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/reflection-chat`;
 
@@ -33,11 +33,18 @@ export function useAIChat(options: UseAIChatOptions = {}) {
     setError(null);
 
     try {
+      // Get the current session for authentication
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session?.access_token) {
+        throw new Error("יש להתחבר למערכת כדי להשתמש בשירות");
+      }
+
       const resp = await fetch(CHAT_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          Authorization: `Bearer ${session.access_token}`,
         },
         body: JSON.stringify({ 
           messages,
@@ -45,6 +52,9 @@ export function useAIChat(options: UseAIChatOptions = {}) {
         }),
       });
 
+      if (resp.status === 401) {
+        throw new Error("יש להתחבר מחדש למערכת");
+      }
       if (resp.status === 429) {
         throw new Error("מגבלת בקשות הושגה, נסו שוב מאוחר יותר");
       }
