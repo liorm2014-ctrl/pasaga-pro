@@ -19,6 +19,31 @@ import { cn } from '@/lib/utils';
 import { useAIChat } from '@/hooks/useAIChat';
 import { toast } from 'sonner';
 
+// Safe message formatting component - prevents XSS by using React components
+const FormattedMessage: React.FC<{ content: string }> = ({ content }) => {
+  // Remove markdown headers and format bold text safely
+  const cleanedContent = content
+    .replace(/###\s*/g, '')
+    .replace(/##\s*/g, '')
+    .replace(/#\s*/g, '')
+    .replace(/\*/g, '');
+  
+  // Split by bold markers and render safely
+  const parts = cleanedContent.split(/\*\*([^*]+)\*\*/);
+  
+  return (
+    <p 
+      className="leading-relaxed whitespace-pre-wrap text-right" 
+      dir="rtl" 
+      style={{ fontSize: '16px', lineHeight: '1.8' }}
+    >
+      {parts.map((part, i) => 
+        i % 2 === 1 ? <strong key={i} className="font-bold">{part}</strong> : part
+      )}
+    </p>
+  );
+};
+
 const getInitialPrompt = (gender?: string) => {
   const isFemale = gender === 'female';
   return isFemale 
@@ -197,20 +222,7 @@ const Reflection: React.FC = () => {
                       ? "bg-accent text-accent-foreground rounded-br-sm" 
                       : "bg-muted text-foreground rounded-bl-sm"
                   )}>
-                    <p 
-                      className="leading-relaxed whitespace-pre-wrap text-right" 
-                      dir="rtl" 
-                      style={{ fontSize: '16px', lineHeight: '1.8' }}
-                      dangerouslySetInnerHTML={{ 
-                        __html: message.content
-                          .replace(/###\s*/g, '')
-                          .replace(/##\s*/g, '')
-                          .replace(/#\s*/g, '')
-                          .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-                          .replace(/\*/g, '')
-                          .replace(/<strong>/g, '<strong style="font-weight: bold;">')
-                      }}
-                    />
+                    <FormattedMessage content={message.content} />
                     <span className="text-xs opacity-60 mt-2 block text-right">
                       {new Date(message.timestamp).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })}
                     </span>
@@ -230,20 +242,7 @@ const Reflection: React.FC = () => {
                   <Bot className="h-5 w-5" />
                 </div>
                 <div className="max-w-[80%] p-4 rounded-2xl bg-muted text-foreground rounded-bl-sm">
-                  <p 
-                    className="leading-relaxed whitespace-pre-wrap text-right" 
-                    dir="rtl" 
-                    style={{ fontSize: '16px', lineHeight: '1.8' }}
-                    dangerouslySetInnerHTML={{ 
-                      __html: streamingContent
-                        .replace(/###\s*/g, '')
-                        .replace(/##\s*/g, '')
-                        .replace(/#\s*/g, '')
-                        .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-                        .replace(/\*/g, '')
-                        .replace(/<strong>/g, '<strong style="font-weight: bold;">')
-                    }}
-                  />
+                  <FormattedMessage content={streamingContent} />
                 </div>
               </motion.div>
             )}
