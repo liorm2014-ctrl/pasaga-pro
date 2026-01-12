@@ -12,7 +12,8 @@ import {
   Bot,
   User,
   Sparkles,
-  Save
+  Save,
+  Loader2
 } from 'lucide-react';
 import { ConversationMessage } from '@/types';
 import { cn } from '@/lib/utils';
@@ -52,7 +53,7 @@ const getInitialPrompt = (gender?: string) => {
 };
 
 const Reflection: React.FC = () => {
-  const { user, updateUser, trainings } = useApp();
+  const { user, updateUser, trainings, isLoading: appLoading, isSaving } = useApp();
   const navigate = useNavigate();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
@@ -166,6 +167,20 @@ const Reflection: React.FC = () => {
       handleSend();
     }
   };
+
+  // Show loading state while data is being fetched
+  if (appLoading) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="h-12 w-12 animate-spin text-primary" />
+            <p className="text-muted-foreground">טוען נתונים...</p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
@@ -300,18 +315,31 @@ const Reflection: React.FC = () => {
         >
           <Button 
             size="lg" 
+            disabled={messages.length < 2 || isSaving}
             onClick={async () => {
-              await updateUser({ reflectionCompleted: true });
-              toast.success('השיחה נשמרה בהצלחה');
-              navigate('/vision');
+              const success = await updateUser({ reflectionCompleted: true });
+              if (success) {
+                toast.success('השיחה נשמרה בהצלחה');
+                navigate('/vision');
+              } else {
+                toast.error('אירעה שגיאה בשמירת השיחה');
+              }
             }}
             className="gap-2 text-white border-0"
             style={{ backgroundColor: 'rgba(30, 58, 95, 0.8)' }}
-            disabled={messages.length < 2}
           >
-            <Save className="h-4 w-4" />
-            שמור והמשך לשלב החזון
-            <ArrowLeft className="h-4 w-4" />
+            {isSaving ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                שומר...
+              </>
+            ) : (
+              <>
+                <Save className="h-4 w-4" />
+                שמור והמשך לשלב החזון
+                <ArrowLeft className="h-4 w-4" />
+              </>
+            )}
           </Button>
         </motion.div>
       </motion.div>

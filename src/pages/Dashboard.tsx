@@ -17,6 +17,7 @@ import {
   User,
   School,
   Lightbulb,
+  Loader2,
 } from 'lucide-react';
 import {
   PieChart,
@@ -40,7 +41,7 @@ import BlockingDialog from '@/components/workflow/BlockingDialog';
 const COLORS = ['#3B82F6', '#F59E0B', '#10B981', '#EF4444', '#8B5CF6', '#EC4899', '#14B8A6', '#F97316', '#6366F1', '#84CC16', '#06B6D4'];
 
 const Dashboard: React.FC = () => {
-  const { user, trainings, updateUser } = useApp();
+  const { user, trainings, updateUser, isLoading, isSaving } = useApp();
   const navigate = useNavigate();
   const { analysis, isLoading: analysisLoading, error: analysisError, fetchAnalysis } = useDashboardAnalysis();
   const { imbalanceDetection, validateStep, hasInstitutions, hasTrainings } = useWorkflowValidation();
@@ -219,6 +220,20 @@ const Dashboard: React.FC = () => {
       });
     }
   }, [analysis, user?.swotAnalysis, updateUser]);
+
+  // Show loading state while data is being fetched
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="h-12 w-12 animate-spin text-primary" />
+            <p className="text-muted-foreground">טוען נתונים...</p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
@@ -534,6 +549,7 @@ const Dashboard: React.FC = () => {
         <div className="flex justify-end">
           <Button 
             size="lg" 
+            disabled={isSaving}
             onClick={async () => {
               await updateUser({ dashboardVisited: true });
               navigate('/reflection');
@@ -541,8 +557,17 @@ const Dashboard: React.FC = () => {
             className="gap-2 text-white border-0"
             style={{ backgroundColor: 'rgba(30, 58, 95, 0.8)' }}
           >
-            שמור והמשך
-            <ArrowLeft className="h-4 w-4" />
+            {isSaving ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                שומר...
+              </>
+            ) : (
+              <>
+                שמור והמשך
+                <ArrowLeft className="h-4 w-4" />
+              </>
+            )}
           </Button>
         </div>
 
