@@ -14,12 +14,13 @@ import {
   Save,
   ExternalLink,
   MessageCircle,
-  Sparkles
+  Sparkles,
+  Loader2
 } from 'lucide-react';
 import { VisionPlan } from '@/types';
 
 const Vision: React.FC = () => {
-  const { user, updateUser } = useApp();
+  const { user, updateUser, isLoading, isSaving } = useApp();
   const navigate = useNavigate();
 
   const [visionPlan, setVisionPlan] = useState<VisionPlan>(
@@ -39,13 +40,31 @@ const Vision: React.FC = () => {
   ];
 
   const handleSave = async () => {
-    await updateUser({
+    const success = await updateUser({
       visionPlan,
       visionCompleted: true,
     });
-    toast.success('החזון נשמר בהצלחה!');
-    navigate('/output');
+    if (success) {
+      toast.success('החזון נשמר בהצלחה!');
+      navigate('/output');
+    } else {
+      toast.error('אירעה שגיאה בשמירת החזון');
+    }
   };
+
+  // Show loading state while data is being fetched
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="h-12 w-12 animate-spin text-primary" />
+            <p className="text-muted-foreground">טוען נתונים...</p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
@@ -187,13 +206,23 @@ const Vision: React.FC = () => {
           </Button>
           <Button 
             size="lg" 
+            disabled={isSaving}
             onClick={handleSave} 
             className="gap-2 text-white border-0"
             style={{ backgroundColor: 'rgba(30, 58, 95, 0.8)' }}
           >
-            <Save className="h-4 w-4" />
-            שמור והמשך
-            <ArrowLeft className="h-4 w-4" />
+            {isSaving ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                שומר...
+              </>
+            ) : (
+              <>
+                <Save className="h-4 w-4" />
+                שמור והמשך
+                <ArrowLeft className="h-4 w-4" />
+              </>
+            )}
           </Button>
         </div>
       </motion.div>
