@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.receive-chat-protocol]
 verify_jwt = false
+
+[functions.gap-analysis]
+verify_jwt = false
