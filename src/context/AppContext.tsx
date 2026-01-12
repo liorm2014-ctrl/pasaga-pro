@@ -7,7 +7,7 @@ interface AppContextType {
   trainings: Training[];
   setTrainings: React.Dispatch<React.SetStateAction<Training[]>>;
   updateUser: (updates: Partial<User>) => void;
-  addTrainings: (newTrainings: Training[]) => void;
+  addTrainings: (newTrainings: Training[], replace?: boolean) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -54,8 +54,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     setUser((prev) => (prev ? { ...prev, ...updates } : null));
   }, []);
 
-  const addTrainings = (newTrainings: Training[]) => {
-    setTrainings((prev) => [...prev, ...newTrainings]);
+  const addTrainings = (newTrainings: Training[], replace = true) => {
+    if (replace) {
+      setTrainings(newTrainings);
+    } else {
+      setTrainings((prev) => [...prev, ...newTrainings]);
+    }
   };
 
   return (

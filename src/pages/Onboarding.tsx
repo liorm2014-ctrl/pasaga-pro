@@ -28,6 +28,7 @@ import {
   Plus
 } from 'lucide-react';
 import { Training } from '@/types';
+import * as XLSX from 'xlsx';
 
 const Onboarding: React.FC = () => {
   const { user, updateUser, addTrainings } = useApp();
@@ -82,42 +83,150 @@ const Onboarding: React.FC = () => {
     setAdditionalFiles(prev => prev.filter((_, i) => i !== index));
   };
 
-  const generateSampleTrainings = (): Training[] => {
-    const categories = ['פדגוגיה', 'טכנולוגיה', 'ניהול', 'רווחה', 'חינוך מיוחד', 'מנהיגות'] as const;
-    const audiences = ['גנים', 'יסודי', 'תיכון', 'חינוך מיוחד'] as const;
-    const reforms = ['אופק חדש', 'עוז לתמורה', 'אחר'] as const;
-    const methods = ['פרונטלי', 'סינכרוני', 'א-סינכרוני'] as const;
-    const domains = ['מנהיגות', 'טכנו-פדגוגיה', 'חינוך מיוחד', 'אחר'] as const;
-    
-    const trainingNames = [
-      'הוראה מותאמת בעידן הדיגיטלי',
-      'מנהיגות פדגוגית בזמני שינוי',
-      'כלים טכנולוגיים לכיתה',
-      'רווחה נפשית של צוות ההוראה',
-      'הוראה דיפרנציאלית',
-      'הערכה מעצבת בפועל',
-      'למידה משמעותית',
-      'שילוב תלמידי חינוך מיוחד',
-      'פיתוח חשיבה יצירתית',
-      'תקשורת בין-אישית',
-      'ניהול זמן וארגון',
-      'AI בחינוך',
-    ];
-
-    return trainingNames.map((name, index) => ({
-      id: `training-${index + 1}`,
-      trainingName: name,
-      date: `2025-${String(Math.floor(Math.random() * 6) + 1).padStart(2, '0')}-${String(Math.floor(Math.random() * 28) + 1).padStart(2, '0')}`,
-      participants: Math.floor(Math.random() * 50) + 10,
-      category: categories[Math.floor(Math.random() * categories.length)],
-      targetAudience: audiences[Math.floor(Math.random() * audiences.length)],
-      reform: reforms[Math.floor(Math.random() * reforms.length)],
-      learningMethod: methods[Math.floor(Math.random() * methods.length)],
-      domain: domains[Math.floor(Math.random() * domains.length)],
-      durationHours: Math.floor(Math.random() * 20) + 4,
-      facilitator: ['ד"ר שרה לוי', 'מר יוסי כהן', 'גב\' רחל מזרחי', 'פרופ\' דוד שמיר'][Math.floor(Math.random() * 4)],
-      userId: user?.id || '1',
-    }));
+  const parseExcelFile = async (file: File): Promise<Training[]> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const data = e.target?.result;
+          const workbook = XLSX.read(data, { type: 'binary' });
+          
+          const allTrainings: Training[] = [];
+          
+          // Parse all sheets in the workbook
+          workbook.SheetNames.forEach((sheetName, sheetIndex) => {
+            const worksheet = workbook.Sheets[sheetName];
+            const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as any[][];
+            
+            if (jsonData.length < 2) return; // Skip empty sheets
+            
+            const headers = jsonData[0] as string[];
+            const rows = jsonData.slice(1);
+            
+            // Map Hebrew column names to our data structure
+            const columnMap: Record<string, string> = {
+              'שם השתלמות': 'trainingName',
+              'שם ההשתלמות': 'trainingName',
+              'תאריך': 'date',
+              'משתתפים': 'participants',
+              'מספר משתתפים': 'participants',
+              'קטגוריה': 'category',
+              'קהל יעד': 'targetAudience',
+              'רפורמה': 'reform',
+              'שיטת למידה': 'learningMethod',
+              'אופן למידה': 'learningMethod',
+              'תחום': 'domain',
+              'שעות': 'durationHours',
+              'משך בשעות': 'durationHours',
+              'מנחה': 'facilitator',
+              'הערות': 'notes',
+            };
+            
+            const getColumnIndex = (fieldName: string): number => {
+              for (const [hebrewName, englishName] of Object.entries(columnMap)) {
+                if (englishName === fieldName) {
+                  const idx = headers.findIndex(h => 
+                    h && h.toString().includes(hebrewName)
+                  );
+                  if (idx !== -1) return idx;
+                }
+              }
+              return -1;
+            };
+            
+            rows.forEach((row, rowIndex) => {
+              if (!row || row.length === 0 || !row.some(cell => cell)) return; // Skip empty rows
+              
+              const nameIdx = getColumnIndex('trainingName');
+              const trainingName = nameIdx !== -1 ? row[nameIdx]?.toString() : row[0]?.toString();
+              
+              if (!trainingName || trainingName.trim() === '') return;
+              
+              const dateIdx = getColumnIndex('date');
+              const participantsIdx = getColumnIndex('participants');
+              const categoryIdx = getColumnIndex('category');
+              const audienceIdx = getColumnIndex('targetAudience');
+              const reformIdx = getColumnIndex('reform');
+              const methodIdx = getColumnIndex('learningMethod');
+              const domainIdx = getColumnIndex('domain');
+              const hoursIdx = getColumnIndex('durationHours');
+              
+              const parseCategory = (val: string): Training['category'] => {
+                const categories = ['פדגוגיה', 'טכנולוגיה', 'ניהול', 'רווחה', 'חינוך מיוחד', 'מנהיגות'];
+                const found = categories.find(c => val?.includes(c));
+                return (found as Training['category']) || 'אחר';
+              };
+              
+              const parseAudience = (val: string): Training['targetAudience'] => {
+                const audiences = ['גנים', 'יסודי', 'תיכון', 'חינוך מיוחד'];
+                const found = audiences.find(a => val?.includes(a));
+                return (found as Training['targetAudience']) || 'יסודי';
+              };
+              
+              const parseReform = (val: string): Training['reform'] => {
+                if (val?.includes('אופק')) return 'אופק חדש';
+                if (val?.includes('עוז')) return 'עוז לתמורה';
+                return 'אחר';
+              };
+              
+              const parseMethod = (val: string): Training['learningMethod'] => {
+                if (val?.includes('סינכרוני') && !val?.includes('א-סינכרוני')) return 'סינכרוני';
+                if (val?.includes('א-סינכרוני')) return 'א-סינכרוני';
+                return 'פרונטלי';
+              };
+              
+              const parseDomain = (val: string): Training['domain'] => {
+                const domains = ['מנהיגות', 'טכנו-פדגוגיה', 'חינוך מיוחד'];
+                const found = domains.find(d => val?.includes(d));
+                return (found as Training['domain']) || 'אחר';
+              };
+              
+              const training: Training = {
+                id: `training-${sheetIndex}-${rowIndex + 1}`,
+                trainingName: trainingName.trim(),
+                date: dateIdx !== -1 && row[dateIdx] ? formatExcelDate(row[dateIdx]) : new Date().toISOString().split('T')[0],
+                participants: participantsIdx !== -1 ? parseInt(row[participantsIdx]) || 20 : 20,
+                category: categoryIdx !== -1 ? parseCategory(row[categoryIdx]?.toString() || '') : 'פדגוגיה',
+                targetAudience: audienceIdx !== -1 ? parseAudience(row[audienceIdx]?.toString() || '') : 'יסודי',
+                reform: reformIdx !== -1 ? parseReform(row[reformIdx]?.toString() || '') : 'אחר',
+                learningMethod: methodIdx !== -1 ? parseMethod(row[methodIdx]?.toString() || '') : 'פרונטלי',
+                domain: domainIdx !== -1 ? parseDomain(row[domainIdx]?.toString() || '') : 'אחר',
+                durationHours: hoursIdx !== -1 ? parseInt(row[hoursIdx]) || 4 : 4,
+                userId: user?.id || '1',
+              };
+              
+              allTrainings.push(training);
+            });
+          });
+          
+          resolve(allTrainings);
+        } catch (error) {
+          console.error('Error parsing Excel file:', error);
+          reject(error);
+        }
+      };
+      reader.onerror = reject;
+      reader.readAsBinaryString(file);
+    });
+  };
+  
+  const formatExcelDate = (excelDate: any): string => {
+    if (typeof excelDate === 'number') {
+      // Excel serial date
+      const date = new Date((excelDate - 25569) * 86400 * 1000);
+      return date.toISOString().split('T')[0];
+    }
+    if (typeof excelDate === 'string') {
+      // Try to parse various date formats
+      const parts = excelDate.split(/[\/\-\.]/);
+      if (parts.length === 3) {
+        const [a, b, c] = parts.map(p => parseInt(p));
+        if (a > 31) return `${a}-${String(b).padStart(2, '0')}-${String(c).padStart(2, '0')}`;
+        if (c > 31) return `${c}-${String(b).padStart(2, '0')}-${String(a).padStart(2, '0')}`;
+      }
+      return excelDate;
+    }
+    return new Date().toISOString().split('T')[0];
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -125,6 +234,11 @@ const Onboarding: React.FC = () => {
     
     if (!formData.fullName || !formData.city) {
       toast.error('נא למלא את כל השדות הנדרשים');
+      return;
+    }
+
+    if (!uploadedFile) {
+      toast.error('נא להעלות קובץ השתלמויות');
       return;
     }
 
@@ -138,14 +252,22 @@ const Onboarding: React.FC = () => {
         onboardingCompleted: true,
       });
 
-      // Generate sample trainings (in real app, parse from uploaded file)
-      const trainings = generateSampleTrainings();
+      // Parse trainings from uploaded Excel file
+      const trainings = await parseExcelFile(uploadedFile);
+      
+      if (trainings.length === 0) {
+        toast.error('לא נמצאו השתלמויות בקובץ');
+        setIsSubmitting(false);
+        return;
+      }
+      
       addTrainings(trainings);
 
-      toast.success('הנתונים נשמרו בהצלחה!');
+      toast.success(`נטענו ${trainings.length} השתלמויות מהקובץ בהצלחה!`);
       navigate('/dashboard');
     } catch (error) {
-      toast.error('אירעה שגיאה בשמירת הנתונים');
+      console.error('Error parsing file:', error);
+      toast.error('אירעה שגיאה בקריאת הקובץ');
     } finally {
       setIsSubmitting(false);
     }
