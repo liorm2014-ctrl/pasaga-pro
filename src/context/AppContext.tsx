@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { User, Training } from '@/types';
+import { useAuth } from '@/context/AuthContext';
 
 interface AppContextType {
   user: User | null;
@@ -12,8 +13,8 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-const defaultUser: User = {
-  id: '1',
+const createDefaultUser = (authUserId: string): User => ({
+  id: authUserId,
   fullName: '',
   gender: '',
   district: '',
@@ -27,28 +28,58 @@ const defaultUser: User = {
   dashboardVisited: false,
   reflectionCompleted: false,
   visionCompleted: false,
+});
+
+// Helper to get user-specific storage key
+const getUserStorageKey = (authUserId: string | undefined, key: string) => {
+  if (!authUserId) return null;
+  return `pisga_${authUserId}_${key}`;
 };
 
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(() => {
-    const saved = localStorage.getItem('pisgaUser');
-    return saved ? JSON.parse(saved) : defaultUser;
-  });
+  const { user: authUser } = useAuth();
+  const authUserId = authUser?.id;
 
-  const [trainings, setTrainings] = useState<Training[]>(() => {
-    const saved = localStorage.getItem('pisgaTrainings');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [user, setUser] = useState<User | null>(null);
+  const [trainings, setTrainings] = useState<Training[]>([]);
 
+  // Load user-specific data when auth user changes
   useEffect(() => {
-    if (user) {
-      localStorage.setItem('pisgaUser', JSON.stringify(user));
+    if (authUserId) {
+      const userKey = getUserStorageKey(authUserId, 'user');
+      const trainingsKey = getUserStorageKey(authUserId, 'trainings');
+      
+      if (userKey) {
+        const savedUser = localStorage.getItem(userKey);
+        setUser(savedUser ? JSON.parse(savedUser) : createDefaultUser(authUserId));
+      }
+      
+      if (trainingsKey) {
+        const savedTrainings = localStorage.getItem(trainingsKey);
+        setTrainings(savedTrainings ? JSON.parse(savedTrainings) : []);
+      }
+    } else {
+      // User logged out - clear state
+      setUser(null);
+      setTrainings([]);
     }
-  }, [user]);
+  }, [authUserId]);
 
+  // Save user data when it changes
   useEffect(() => {
-    localStorage.setItem('pisgaTrainings', JSON.stringify(trainings));
-  }, [trainings]);
+    const userKey = getUserStorageKey(authUserId, 'user');
+    if (user && userKey) {
+      localStorage.setItem(userKey, JSON.stringify(user));
+    }
+  }, [user, authUserId]);
+
+  // Save trainings when they change
+  useEffect(() => {
+    const trainingsKey = getUserStorageKey(authUserId, 'trainings');
+    if (trainingsKey && authUserId) {
+      localStorage.setItem(trainingsKey, JSON.stringify(trainings));
+    }
+  }, [trainings, authUserId]);
 
   const updateUser = useCallback((updates: Partial<User>) => {
     setUser((prev) => (prev ? { ...prev, ...updates } : null));
