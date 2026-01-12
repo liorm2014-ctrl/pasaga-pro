@@ -93,20 +93,6 @@ const Dashboard: React.FC = () => {
     ];
   }, [user]);
 
-  // Reform distribution
-  const reformData = useMemo(() => {
-    const grouped = trainings.reduce((acc, t) => {
-      acc[t.reform] = (acc[t.reform] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
-
-    const total = Object.values(grouped).reduce((a, b) => a + b, 0);
-    return Object.entries(grouped).map(([name, value]) => ({
-      name,
-      value,
-      percentage: total > 0 ? Math.round((value / total) * 100) : 0,
-    }));
-  }, [trainings]);
 
   // Learning method distribution
   const learningMethodData = useMemo(() => {
@@ -123,23 +109,6 @@ const Dashboard: React.FC = () => {
     }));
   }, [trainings]);
 
-  // Content domains data - expanded
-  const contentDomainsData = useMemo(() => {
-    const domains = ['מתמטיקה', 'שפה', 'אנגלית', 'מנהיגות', 'SEL', 'קידום מצוינות', 'קהילה', 'טכנופדגוגיה', 'מדעים', 'STEAM', 'חינוך מיוחד'];
-    
-    // Count trainings by domain - for demo, distribute randomly based on actual trainings
-    const domainCounts = domains.map(domain => {
-      const count = trainings.filter(t => 
-        t.domain === domain || 
-        t.trainingName.includes(domain) ||
-        Math.random() > 0.7 // Add some random distribution for demo
-      ).length || Math.floor(Math.random() * 10) + 1;
-      
-      return { name: domain, count };
-    });
-    
-    return domainCounts;
-  }, [trainings]);
 
   const categoryData = useMemo(() => {
     const grouped = trainings.reduce((acc, t) => {
@@ -380,38 +349,9 @@ const Dashboard: React.FC = () => {
 
         {/* Charts Grid - Row 1 */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Pie Chart - Reform Distribution */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.3 }}
-            className="card-elevated"
-          >
-            <h3 className="font-bold text-foreground mb-4">התפלגות לפי רפורמות</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={reformData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={true}
-                  label={renderCustomizedLabel}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {reformData.map((_, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(value, name) => [`${value} השתלמויות`, name]} />
-              </PieChart>
-            </ResponsiveContainer>
-          </motion.div>
-
           {/* Pie Chart - Learning Methods */}
           <motion.div
-            initial={{ opacity: 0, x: 20 }}
+            initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.3 }}
             className="card-elevated"
@@ -434,18 +374,16 @@ const Dashboard: React.FC = () => {
                   ))}
                 </Pie>
                 <Tooltip formatter={(value, name) => [`${value} השתלמויות`, name]} />
+                <Legend />
               </PieChart>
             </ResponsiveContainer>
           </motion.div>
-        </div>
 
-        {/* Charts Grid - Row 2 */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Pie Chart - Category Distribution */}
           <motion.div
-            initial={{ opacity: 0, x: -20 }}
+            initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.35 }}
+            transition={{ delay: 0.3 }}
             className="card-elevated"
           >
             <h3 className="font-bold text-foreground mb-4">התפלגות לפי קטגוריה</h3>
@@ -466,13 +404,17 @@ const Dashboard: React.FC = () => {
                   ))}
                 </Pie>
                 <Tooltip formatter={(value, name) => [`${value} השתלמויות`, name]} />
+                <Legend />
               </PieChart>
             </ResponsiveContainer>
           </motion.div>
+        </div>
 
+        {/* Charts Grid - Row 2 */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Bar Chart - Audience */}
           <motion.div
-            initial={{ opacity: 0, x: 20 }}
+            initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.35 }}
             className="card-elevated"
@@ -491,41 +433,41 @@ const Dashboard: React.FC = () => {
                   }}
                   formatter={(value, name) => [`${value} השתלמויות`, 'כמות']}
                 />
-                <Bar dataKey="count" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="count" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} label={{ position: 'top', fill: 'hsl(var(--foreground))', fontSize: 12 }} />
               </BarChart>
             </ResponsiveContainer>
           </motion.div>
-        </div>
 
-        {/* Content Domains Bar Chart - Full Width */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="card-elevated"
-        >
-          <h3 className="font-bold text-foreground mb-4">תחומי תוכן עיקריים</h3>
-          <ResponsiveContainer width="100%" height={350}>
-            <BarChart data={contentDomainsData} layout="vertical">
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-              <XAxis type="number" tick={{ fill: 'hsl(var(--foreground))' }} />
-              <YAxis type="category" dataKey="name" tick={{ fill: 'hsl(var(--foreground))', fontSize: 12 }} width={100} />
-              <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: 'hsl(var(--card))',
-                  border: '1px solid hsl(var(--border))',
-                  borderRadius: '8px'
-                }}
-                formatter={(value) => [`${value} השתלמויות`, 'כמות']}
-              />
-              <Bar dataKey="count" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]}>
-                {contentDomainsData.map((_, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </motion.div>
+          {/* Pie Chart - Target Audience Distribution */}
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.35 }}
+            className="card-elevated"
+          >
+            <h3 className="font-bold text-foreground mb-4">התפלגות משתתפים לפי קהל יעד</h3>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={audienceData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={true}
+                  label={renderCustomizedLabel}
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="count"
+                >
+                  {audienceData.map((_, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip formatter={(value, name) => [`${value} השתלמויות`, name]} />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </motion.div>
+        </div>
 
         {/* Verbal Analysis Section - Replaces Line Chart */}
         <motion.div
