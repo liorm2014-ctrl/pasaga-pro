@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { GapAnalysis } from '@/types/workflow';
 
 const GAP_ANALYSIS_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/gap-analysis`;
@@ -30,15 +31,25 @@ export const useGapAnalysis = () => {
     setError(null);
 
     try {
+      // Get the current session for authentication
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session?.access_token) {
+        throw new Error("יש להתחבר למערכת כדי להשתמש בשירות");
+      }
+
       const response = await fetch(GAP_ANALYSIS_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          Authorization: `Bearer ${session.access_token}`,
         },
         body: JSON.stringify({ trainings, institutions, currentStrengths }),
       });
 
+      if (response.status === 401) {
+        throw new Error("יש להתחבר מחדש למערכת");
+      }
       if (!response.ok) {
         if (response.status === 429) {
           throw new Error('המערכת עמוסה, אנא נסה שוב מאוחר יותר');

@@ -2,8 +2,12 @@ import React from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
+import { ArrowLeft, LogIn, Rocket } from "lucide-react";
 
 const HeroCard: React.FC = () => {
+  const { user } = useAuth();
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -39,6 +43,38 @@ const HeroCard: React.FC = () => {
           מסע מנהיגותי לניתוח, רפלקציה וחזון אסטרטגי. שלבו בינה מלאכותית עם מתודולוגיה מקצועית ליצירת תוכנית עבודה שנתית
           מותאמת אישית.
         </motion.p>
+
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="flex flex-col sm:flex-row gap-4 justify-center"
+        >
+          {user ? (
+            <Link to="/onboarding">
+              <Button size="lg" className="gap-2 text-lg px-8">
+                <Rocket className="h-5 w-5" />
+                המשך במסע
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+            </Link>
+          ) : (
+            <>
+              <Link to="/auth">
+                <Button size="lg" className="gap-2 text-lg px-8">
+                  <LogIn className="h-5 w-5" />
+                  התחל את המסע
+                  <ArrowLeft className="h-5 w-5" />
+                </Button>
+              </Link>
+              <Link to="/auth">
+                <Button size="lg" variant="outline" className="gap-2 text-lg px-8">
+                  יש לי חשבון - התחבר
+                </Button>
+              </Link>
+            </>
+          )}
+        </motion.div>
       </div>
     </motion.div>
   );
