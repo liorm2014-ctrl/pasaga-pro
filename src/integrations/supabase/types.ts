@@ -21,6 +21,7 @@ export type Database = {
           id: string
           session_id: string
           summary: string | null
+          user_id: string | null
         }
         Insert: {
           created_at?: string
@@ -28,6 +29,7 @@ export type Database = {
           id?: string
           session_id: string
           summary?: string | null
+          user_id?: string | null
         }
         Update: {
           created_at?: string
@@ -35,6 +37,85 @@ export type Database = {
           id?: string
           session_id?: string
           summary?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          data: Json
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          data?: Json
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          data?: Json
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      trainings: {
+        Row: {
+          category: string
+          created_at: string
+          date: string
+          domain: string
+          duration_hours: number
+          facilitator: string | null
+          id: string
+          learning_method: string
+          notes: string | null
+          participants: number
+          reform: string
+          target_audience: string
+          training_name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          date: string
+          domain: string
+          duration_hours?: number
+          facilitator?: string | null
+          id?: string
+          learning_method: string
+          notes?: string | null
+          participants?: number
+          reform: string
+          target_audience: string
+          training_name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          date?: string
+          domain?: string
+          duration_hours?: number
+          facilitator?: string | null
+          id?: string
+          learning_method?: string
+          notes?: string | null
+          participants?: number
+          reform?: string
+          target_audience?: string
+          training_name?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
